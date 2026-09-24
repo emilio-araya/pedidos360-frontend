@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Build container
+        run: >-
+          docker build
+          --build-arg ENTRA_TENANT_ID=00000000-0000-0000-0000-000000000001
+          --build-arg ENTRA_CLIENT_ID=00000000-0000-0000-0000-000000000002
+          --build-arg API_SCOPE=api://00000000-0000-0000-0000-000000000003/access_as_user
+          --build-arg API_BASE_URL=http://localhost:8080
+          --build-arg REDIRECT_URI=http://localhost:4200/login
+          --build-arg POST_LOGOUT_REDIRECT_URI=http://localhost:4200/login
+          -t pedidos360-frontend:ci .

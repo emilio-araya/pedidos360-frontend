@@ -5,7 +5,8 @@ SPA React + Vite + TypeScript para la gestión de pedidos y catálogo de Pedidos
 ## Requisitos
 
 - Node.js 26 y npm.
-- Microsoft Entra ID configurado para la SPA y la API.
+- Microsoft Entra ID configurado para la SPA y la API en `/api/**`.
+- Amazon Cognito configurado con Authorization Code + PKCE S256 para `/aws/api/**`.
 - Docker opcional para servir el build mediante Nginx.
 
 ## Desarrollo
@@ -26,10 +27,17 @@ API_SCOPE=... \
 API_BASE_URL=https://api.example.com \
 REDIRECT_URI=https://app.example.com/login \
 POST_LOGOUT_REDIRECT_URI=https://app.example.com/login \
+COGNITO_USER_POOL_ID=us-east-1_example \
+COGNITO_USER_POOL_CLIENT_ID=example-client-id \
+COGNITO_DOMAIN=example.auth.us-east-1.amazoncognito.com \
+COGNITO_ISSUER=https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example \
+COGNITO_REDIRECT_URI=https://app.example.com/auth/cognito/callback \
+COGNITO_LOGOUT_URI=https://app.example.com/login \
+COGNITO_API_SCOPE='openid email profile' \
 npm run generate:environment
 ```
 
-El frontend es una SPA pública: utiliza Authorization Code + PKCE y no distribuye client secrets. MSAL obtiene el token delegado `access_as_user` y el cliente HTTP lo envía únicamente a la URL de la API.
+El frontend es una SPA pública: utiliza Authorization Code + PKCE y no distribuye client secrets. MSAL obtiene el token delegado de Entra para `/api/**`; Amplify obtiene de forma independiente el access token de Cognito para `/aws/api/**` y lo guarda en `sessionStorage` (con fallback de memoria), no en `localStorage`. Los callbacks de Cognito (`/auth/cognito/callback`) y Entra (`/login`) están separados para que un proveedor no procese el código del otro.
 
 ## Verificación
 
@@ -38,11 +46,13 @@ npm test
 npm run build
 ```
 
-Las pruebas cubren claims, roles, transiciones, cliente HTTP, servicios y la vista de login. El build de Vite genera `dist/`.
+Las pruebas cubren claims, roles, transiciones, cliente HTTP, servicios, login, callback y sesión Cognito. El build de Vite genera `dist/`.
 
 ## Rutas y autorización
 
-- `/login`: inicio de sesión con Microsoft.
+- `/login`: inicio de sesión con Microsoft o Amazon Cognito.
+- `/auth/cognito/callback`: callback OAuth/PKCE de Cognito.
+- `/aws`: portal protegido por sesión Cognito y limitado a `/aws/api/**`.
 - `/dashboard`: resumen y pedidos recientes.
 - `/orders`: consulta, creación y seguimiento de pedidos.
 - `/catalog`: productos y stock; requiere rol `Admin` u `Operador`.

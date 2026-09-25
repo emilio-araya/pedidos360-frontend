@@ -37,4 +37,11 @@ jobs:
           --build-arg API_BASE_URL=http://localhost:8080
           --build-arg REDIRECT_URI=http://localhost:4200/login
           --build-arg POST_LOGOUT_REDIRECT_URI=http://localhost:4200/login
+          --build-arg COGNITO_USER_POOL_ID=us-east-1_example
+          --build-arg COGNITO_USER_POOL_CLIENT_ID=exampleclientid
+          --build-arg COGNITO_DOMAIN=example.auth.us-east-1.amazoncognito.com
+          --build-arg COGNITO_ISSUER=https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example
+          --build-arg COGNITO_REDIRECT_URI=http://localhost:4200/auth/cognito/callback
+          --build-arg COGNITO_LOGOUT_URI=http://localhost:4200/login
+          --build-arg 'COGNITO_API_SCOPE=openid email profile'
           -t pedidos360-frontend:ci .

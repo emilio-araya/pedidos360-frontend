@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { InteractionStatus } from "@azure/msal-browser";
 import { useMsal } from "@azure/msal-react";
 import { useNavigate } from "react-router-dom";
+import { environment } from "../config/environment";
 
 export function RedirectHandler() {
   const { instance, inProgress } = useMsal();
@@ -9,6 +10,13 @@ export function RedirectHandler() {
   const started = useRef(false);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const entraCallbackPath = new URL(
+        environment.redirectUri,
+        window.location.origin,
+      ).pathname;
+      if (window.location.pathname !== entraCallbackPath) return;
+    }
     if (inProgress === InteractionStatus.Startup || started.current) return;
     started.current = true;
     void instance

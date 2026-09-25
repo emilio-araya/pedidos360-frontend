@@ -7,4 +7,12 @@ export const environment = {
   apiScope: "api://150f51db-4084-4979-b1a1-e6a6e7893a01/access_as_user",
   redirectUri: "http://localhost:4200/login",
   postLogoutRedirectUri: "http://localhost:4200/login",
+  cognitoUserPoolId: "us-east-1_UmEhPRYdI",
+  cognitoUserPoolClientId: "59be26pgg5ginu2sutr8eetgjg",
+  cognitoDomain: "us-east-1umehprydi.auth.us-east-1.amazoncognito.com",
+  cognitoIssuer: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_UmEhPRYdI",
+  cognitoRedirectUri: "http://localhost:4200/auth/cognito/callback",
+  cognitoLogoutUri: "http://localhost:4200/login",
+  cognitoApiScope: "openid email profile",
+  awsApiPrefix: "/aws/api",
 } as const;

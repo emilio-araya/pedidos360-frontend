@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   claimsFromAccessToken,
+  cognitoRolesFromClaims,
   effectiveClaims,
   normalizeRole,
   oidFromClaims,
@@ -15,6 +16,14 @@ describe("claims de autenticación", () => {
       rolesFromClaims({ roles: ["Admin", "Operador", "admin", "desconocido"] }),
     ).toEqual(["Admin", "Operador"]);
     expect(rolesFromClaims({ roles: "Cliente" })).toEqual(["Cliente"]);
+  });
+
+  it("solo acepta los nombres exactos de grupos Cognito", () => {
+    expect(
+      cognitoRolesFromClaims({
+        "cognito:groups": ["Admin", "admin", "Operador", "Desconocido"],
+      }),
+    ).toEqual(["Admin", "Operador"]);
   });
 
   it("usa oid y falling back a sub", () => {
@@ -36,13 +45,17 @@ describe("claims de autenticación", () => {
     expect(claimsFromAccessToken("not-a-token")).toEqual({});
   });
 
-  it("combina claims sin perder la identidad de la cuenta", () => {
+  it("usa identidad del ID token pero nunca roles del ID token", () => {
     const account = {
       idTokenClaims: { oid: "oid-1", roles: ["Cliente"] },
     } as never;
     expect(
       effectiveClaims(account, { roles: ["Admin"], sub: "sub-1" }),
     ).toEqual({ oid: "oid-1", roles: ["Admin"], sub: "sub-1" });
+    expect(effectiveClaims(account, { sub: "sub-1" })).toEqual({
+      oid: "oid-1",
+      sub: "sub-1",
+    });
   });
 
   it("solo cambia la cuenta activa cuando corresponde", () => {

@@ -198,6 +198,30 @@ a {
 .brand b {
   color: #8bbcff;
 }
+.nav-button {
+  border: 0;
+  color: var(--brand-dark);
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.nav-button:hover:not(:disabled) {
+  color: var(--brand);
+}
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+.aws-portal-page .card__body .recent-row {
+  align-items: center;
+}
+.aws-portal-page .recent-row > div {
+  display: grid;
+  gap: 0.2rem;
+}
 .brand small {
   margin-left: 0.5rem;
   color: var(--muted);

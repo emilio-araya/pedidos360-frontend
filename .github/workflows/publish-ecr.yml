@@ -1,0 +1,68 @@
+name: Publish Frontend image to ECR
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Tag de imagen (vacío = SHA del commit)"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: pedidos360-frontend-ecr
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: aws-production
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      ECR_REPOSITORY: ${{ vars.FRONTEND_ECR_REPOSITORY }}
+      IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
+      API_BASE_URL: ${{ vars.API_BASE_URL }}
+      COGNITO_REDIRECT_URI: ${{ vars.COGNITO_REDIRECT_URI }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check public configuration
+        run: |
+          test -n "$AWS_REGION"
+          test -n "$ECR_REPOSITORY"
+          test -n "$IMAGE_TAG"
+          test -n "$API_BASE_URL"
+          test -n "$COGNITO_REDIRECT_URI"
+      - name: Configure AWS with GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          build-args: |
+            ENTRA_TENANT_ID=${{ vars.ENTRA_TENANT_ID }}
+            ENTRA_CLIENT_ID=${{ vars.ENTRA_CLIENT_ID }}
+            API_SCOPE=${{ vars.API_SCOPE }}
+            API_BASE_URL=${{ vars.API_BASE_URL }}
+            REDIRECT_URI=${{ vars.ENTRA_REDIRECT_URI }}
+            POST_LOGOUT_REDIRECT_URI=${{ vars.ENTRA_POST_LOGOUT_REDIRECT_URI }}
+            COGNITO_USER_POOL_ID=${{ vars.COGNITO_USER_POOL_ID }}
+            COGNITO_USER_POOL_CLIENT_ID=${{ vars.COGNITO_USER_POOL_CLIENT_ID }}
+            COGNITO_DOMAIN=${{ vars.COGNITO_DOMAIN }}
+            COGNITO_ISSUER=${{ vars.COGNITO_ISSUER }}
+            COGNITO_REDIRECT_URI=${{ vars.COGNITO_REDIRECT_URI }}
+            COGNITO_LOGOUT_URI=${{ vars.COGNITO_LOGOUT_URI }}
+            COGNITO_API_SCOPE=${{ vars.COGNITO_API_SCOPE }}
+          tags: ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}

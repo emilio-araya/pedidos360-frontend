@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import { useCognitoAuth } from "../auth/CognitoAuthContext";
 
 export function AppShell() {
   const { displayName, roles, canManageCatalog, logout } = useAuth();
+  const { isAuthenticated: cognitoAuthenticated, login: loginCognito } =
+    useCognitoAuth();
   const navigate = useNavigate();
   const [loggingOut, setLoggingOut] = useState(false);
+  const [cognitoLoading, setCognitoLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleLogout() {
@@ -22,6 +26,26 @@ export function AppShell() {
           : "No fue posible cerrar la sesión.",
       );
       setLoggingOut(false);
+    }
+  }
+
+  async function handleCognitoAccess() {
+    if (cognitoLoading) return;
+    if (cognitoAuthenticated) {
+      navigate("/aws");
+      return;
+    }
+    setCognitoLoading(true);
+    setError(null);
+    try {
+      await loginCognito();
+    } catch (reason) {
+      setError(
+        reason instanceof Error
+          ? reason.message
+          : "No fue posible iniciar sesión en AWS.",
+      );
+      setCognitoLoading(false);
     }
   }
 
@@ -43,6 +67,14 @@ export function AppShell() {
             </NavLink>
             <NavLink to="/orders">Pedidos</NavLink>
             {canManageCatalog && <NavLink to="/catalog">Catálogo</NavLink>}
+            <button
+              className="nav-button"
+              type="button"
+              onClick={() => void handleCognitoAccess()}
+              disabled={cognitoLoading}
+            >
+              {cognitoLoading ? "Abriendo AWS…" : "Módulos AWS"}
+            </button>
           </nav>
           <div className="account">
             <div className="account__identity">

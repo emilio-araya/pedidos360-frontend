@@ -1,5 +1,10 @@
 # Pedidos360 frontend
 
+[![CI](https://github.com/emilio-araya/pedidos360-frontend/actions/workflows/ci.yml/badge.svg)](https://github.com/emilio-araya/pedidos360-frontend/actions/workflows/ci.yml)
+[![React](https://img.shields.io/badge/React-19.3.0-61DAFB?logo=react&logoColor=black)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Vite](https://img.shields.io/badge/Vite-8.3.1-646FFC?logo=vite&logoColor=white)](https://vite.dev)
+
 SPA React + Vite + TypeScript para la gestión de pedidos y catálogo de Pedidos360.
 
 ## Requisitos

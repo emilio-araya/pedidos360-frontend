@@ -48,10 +48,21 @@ El frontend es una SPA pública: utiliza Authorization Code + PKCE y no distribu
 
 ```bash
 npm test
+npm run test:coverage
 npm run build
 ```
 
 Las pruebas cubren claims, roles, transiciones, cliente HTTP, servicios, login, callback y sesión Cognito. El build de Vite genera `dist/`.
+
+| Métrica | Valor | Umbral |
+|---|---|---|
+| Pruebas | 23 | — |
+| Líneas | 71.2% | 65% |
+| Sentencias | 68.14% | 60% |
+| Funciones | 67.56% | 60% |
+| Ramas | 53.36% | 45% |
+
+La CI ejecuta `npm run test:coverage` en cada push y pull request, muestra el resumen en la página del workflow y adjunta el informe HTML como artefacto. Los umbrales están en `vitest.config.ts` y el comando falla si la cobertura baja de ellos.
 
 ## Rutas y autorización
 

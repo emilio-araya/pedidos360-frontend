@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   test:
-    name: Test and build
+    name: Tests and coverage
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -24,8 +24,48 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
-      - name: Run tests
-        run: npm test
+      - name: Run tests with coverage
+        run: npm run test:coverage
+      - name: Resumen de pruebas y cobertura
+        run: |
+          python3 - <<'PYEOF'
+          import json, os
+          from pathlib import Path
+
+          p = Path('coverage/coverage-summary.json')
+          if p.exists():
+              total = json.loads(p.read_text()).get('total', {})
+          else:
+              total = {}
+
+          def valor(metric, key):
+              return total.get(metric, {}).get(key, 'n/d')
+
+          filas = [
+              ('Sentencias', valor('statements', 'pct'), 60),
+              ('Ramas', valor('branches', 'pct'), 45),
+              ('Funciones', valor('functions', 'pct'), 60),
+              ('Lineas', valor('lines', 'pct'), 65),
+          ]
+          lineas_ok = all(
+              v == 'n/d' or float(v) >= umbral for _, v, umbral in filas
+          )
+
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as fh:
+              fh.write('### Resumen de pruebas\n\n')
+              fh.write('| Metrica | Cobertura | Umbral |\n|---|---|---|\n')
+              for nombre, valor_pct, umbral in filas:
+                  fh.write(f'| {nombre} | {valor_pct}% | {umbral}% |\n')
+          for nombre, valor_pct, umbral in filas:
+              print(f'{nombre}: {valor_pct}% (umbral {umbral}%)')
+          assert lineas_ok, 'la cobertura quedo bajo el umbral'
+          PYEOF
+      - name: Adjuntar reporte de cobertura
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage
+          retention-days: 30
       - name: Build
         run: npm run build
       - name: Build container

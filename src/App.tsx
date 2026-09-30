@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "./components/AppShell";
-import { RequireAuth, RequireCatalogRole } from "./auth/RequireAuth";
+import { RequireAuth } from "./auth/RequireAuth";
+import { RequireCatalogRole } from "./auth/RequireCatalogRole";
 import { RequireCognitoAuth } from "./auth/RequireCognitoAuth";
 import { AwsPortalPage } from "./pages/AwsPortalPage";
 import { CognitoCallbackPage } from "./pages/CognitoCallbackPage";

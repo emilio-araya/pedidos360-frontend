@@ -2,7 +2,8 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useAuth } from "./AuthContext";
-import { RequireAuth, RequireCatalogRole } from "./RequireAuth";
+import { RequireAuth } from "./RequireAuth";
+import { RequireCatalogRole } from "./RequireCatalogRole";
 
 vi.mock("./AuthContext", () => ({ useAuth: vi.fn() }));
 

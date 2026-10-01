@@ -69,4 +69,61 @@ describe("LoginPage", () => {
     );
     expect(login).toHaveBeenCalledTimes(1);
   });
+
+  it("muestra error cuando login de MSAL falla", async () => {
+    login.mockRejectedValueOnce(new Error("Error de autenticación"));
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+    await user.click(
+      screen.getByRole("button", { name: /continuar con microsoft/i }),
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent("Error de autenticación");
+  });
+
+  it("muestra error cuando login de Cognito falla", async () => {
+    cognitoLogin.mockRejectedValueOnce(new Error("Error de Cognito"));
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+    await user.click(
+      screen.getByRole("button", { name: /acceder con amazon cognito/i }),
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent("Error de Cognito");
+  });
+
+  it("muestra pantalla de carga cuando isLoading es true", () => {
+    mockedUseAuth.mockReturnValue({
+      isAuthenticated: false,
+      isLoading: true,
+      login,
+    } as never);
+    render(
+      <MemoryRouter>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+    expect(screen.getByText("Validando sesión…")).toBeInTheDocument();
+  });
+
+  it("no muestra el botón de Cognito cuando no está configurado", () => {
+    mockedUseCognitoAuth.mockReturnValue({
+      isConfigured: false,
+      login: cognitoLogin,
+    } as never);
+    render(
+      <MemoryRouter>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+    expect(
+      screen.queryByRole("button", { name: /acceder con amazon cognito/i }),
+    ).not.toBeInTheDocument();
+  });
 });

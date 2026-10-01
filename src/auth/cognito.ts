@@ -76,3 +76,35 @@ if (cognitoConfigured) {
     },
   });
 }
+
+/**
+ * Construye la URL de registro en el hosted UI de Cognito.
+ *
+ * El alta de usuario se delega al formulario alojado por Cognito en lugar de
+ * llamar a la API SignUp desde el navegador: el usuario queda creado dentro
+ * del User Pool, con la politica de contrasenas del tenant aplicada, y el
+ * retorno usa el mismo Authorization Code con PKCE que el inicio de sesion.
+ */
+export interface CognitoSignupConfig {
+  cognitoDomain: string;
+  cognitoUserPoolClientId: string;
+  cognitoApiScope: string;
+  cognitoRedirectUri: string;
+}
+
+export function buildCognitoSignupUrl(
+  config: CognitoSignupConfig,
+): string | null {
+  const { cognitoDomain, cognitoUserPoolClientId, cognitoApiScope, cognitoRedirectUri } = config;
+  if (!cognitoDomain || !cognitoUserPoolClientId || !cognitoRedirectUri) return null;
+
+  const params = new URLSearchParams({
+    client_id: cognitoUserPoolClientId,
+    response_type: "code",
+    scope: cognitoApiScope,
+    redirect_uri: cognitoRedirectUri,
+  });
+  return `https://${cognitoDomain.replace(/^https?:\/\//, "").replace(/\/$/, "")}/signup?${params.toString()}`;
+}
+
+export const cognitoSignupUrl = buildCognitoSignupUrl(environment);

@@ -475,6 +475,22 @@ a {
   flex: 1;
   background: var(--border);
 }
+.signup-note {
+  margin: 0.85rem 0 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.signup-note a {
+  color: var(--brand);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.signup-note a:hover {
+  opacity: 0.85;
+}
+
 .security-note {
   display: flex;
   gap: 0.65rem;

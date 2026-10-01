@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { useCognitoAuth } from "../auth/CognitoAuthContext";
+import { cognitoSignupUrl } from "../auth/cognito";
 import { environment } from "../config/environment";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
@@ -119,6 +120,15 @@ export function LoginPage() {
             >
               {cognitoSigningIn ? "Redirigiendo a AWS…" : "Acceder con Amazon Cognito"}
             </button>
+          )}
+
+          {cognitoSignupUrl && (
+            <p className="signup-note">
+              ¿No tienes cuenta en AWS?{" "}
+              <a href={cognitoSignupUrl} rel="noreferrer">
+                Crear cuenta en el tenant
+              </a>
+            </p>
           )}
           <div className="login-divider">
             <span>Acceso protegido</span>

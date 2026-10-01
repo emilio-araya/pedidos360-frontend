@@ -12,7 +12,7 @@ import {
   signInWithRedirect,
   signOut,
 } from "aws-amplify/auth";
-import { cognitoConfigured } from "./cognito";
+import { buildCognitoSignOutUrl, cognitoConfigured } from "./cognito";
 import { environment } from "../config/environment";
 import type { AppRole } from "../types";
 import { cognitoRolesFromClaims } from "../utils/claims";
@@ -25,7 +25,7 @@ interface CognitoAuthContextValue {
   sub: string | null;
   username: string | null;
   login: () => Promise<void>;
-  logout: () => Promise<void>;
+  logout: (continueAt?: string) => Promise<void>;
   getAccessToken: () => Promise<string>;
   refresh: () => Promise<boolean>;
 }
@@ -122,8 +122,24 @@ export function CognitoAuthProvider({ children }: { children: ReactNode }) {
     await signInWithRedirect();
   }, []);
 
-  const logout = useCallback(async () => {
+  const logout = useCallback(async (continueAt?: string) => {
     if (!cognitoConfigured) return;
+
+    // Con destino de continuacion se pasa por el logout federado del hosted
+    // UI, que ademas permite encadenar el cierre de Entra desde esa ruta.
+    // Sin destino se usa el signOut de Amplify.
+    if (continueAt) {
+      const url = buildCognitoSignOutUrl(environment, continueAt);
+      if (url) {
+        setIsAuthenticated(false);
+        setGroups([]);
+        setSub(null);
+        setUsername(null);
+        window.location.assign(url);
+        return;
+      }
+    }
+
     await signOut({
       global: false,
       oauth: { redirectUrl: environment.cognitoLogoutUri },

@@ -108,3 +108,33 @@ export function buildCognitoSignupUrl(
 }
 
 export const cognitoSignupUrl = buildCognitoSignupUrl(environment);
+
+/**
+ * Construye la URL de cierre de sesion en el hosted UI de Cognito.
+ *
+ * No basta con borrar los tokens locales: la sesion SSO del User Pool
+ * sobrevive en el navegador y el proximo "Acceder con Amazon Cognito"
+ * reentraria sin pedir credenciales. Hay que pasar por /logout para
+ * cerrar la sesion federada de verdad.
+ *
+ * logoutUri permite encadenar el cierre de Entra: Cognito devuelve el
+ * control a esa ruta de la aplicacion, que despues cierra la sesion de
+ * Microsoft y recien ahi vuelve al login.
+ */
+export function buildCognitoSignOutUrl(
+  config: CognitoSignupConfig,
+  logoutUri: string,
+): string | null {
+  if (!config.cognitoDomain || !config.cognitoUserPoolClientId || !logoutUri) {
+    return null;
+  }
+
+  const domain = config.cognitoDomain
+    .replace(/^https?:\/\//, "")
+    .replace(/\/$/, "");
+  const params = new URLSearchParams({
+    client_id: config.cognitoUserPoolClientId,
+    logout_uri: logoutUri,
+  });
+  return `https://${domain}/logout?${params.toString()}`;
+}

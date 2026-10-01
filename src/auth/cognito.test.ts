@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCognitoSignupUrl } from "./cognito";
+import { buildCognitoSignOutUrl, buildCognitoSignupUrl } from "./cognito";
 
 const completa = {
   cognitoDomain: "example.auth.us-east-1.amazoncognito.com",
@@ -60,5 +60,34 @@ describe("URL de registro en el tenant", () => {
     const url = buildCognitoSignupUrl(completa) as string;
     expect(url).not.toContain("secret");
     expect(url).not.toContain("client_secret");
+  });
+});
+
+describe("URL de cierre de sesion federada", () => {
+  it("usa /logout del hosted UI y no solo borrar tokens locales", () => {
+    const url = buildCognitoSignOutUrl(completa, "http://localhost:4200/logout/continuar");
+    expect(url?.startsWith("https://example.auth.us-east-1.amazoncognito.com/logout?")).toBe(true);
+  });
+
+  it("declara el destino de continuacion para encadenar el cierre de Entra", () => {
+    const url = new URL(
+      buildCognitoSignOutUrl(completa, "http://localhost:4200/logout/continuar") as string,
+    );
+    expect(url.searchParams.get("logout_uri")).toBe(
+      "http://localhost:4200/logout/continuar",
+    );
+    expect(url.searchParams.get("client_id")).toBe("example-client-id");
+  });
+
+  it("no puede quedar sin destino, porque dejaria la sesion viva", () => {
+    expect(buildCognitoSignOutUrl(completa, "")).toBeNull();
+    expect(buildCognitoSignOutUrl({ ...completa, cognitoDomain: "" }, "http://x/y")).toBeNull();
+  });
+
+  it("no envia ningun token ni secret en la URL de logout", () => {
+    const url = buildCognitoSignOutUrl(completa, "http://localhost:4200/logout/continuar") as string;
+    expect(url.toLowerCase()).not.toContain("secret");
+    expect(url.toLowerCase()).not.toContain("id_token");
+    expect(url.toLowerCase()).not.toContain("access_token");
   });
 });

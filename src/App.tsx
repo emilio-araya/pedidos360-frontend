@@ -5,6 +5,7 @@ import { RequireCatalogRole } from "./auth/RequireCatalogRole";
 import { RequireCognitoAuth } from "./auth/RequireCognitoAuth";
 import { AwsPortalPage } from "./pages/AwsPortalPage";
 import { CognitoCallbackPage } from "./pages/CognitoCallbackPage";
+import { PostLogoutPage } from "./pages/PostLogoutPage";
 import { LoginPage } from "./pages/LoginPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { OrdersPage } from "./pages/OrdersPage";
@@ -14,6 +15,7 @@ export function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/logout/continuar" element={<PostLogoutPage />} />
       <Route path="/auth/cognito/callback" element={<CognitoCallbackPage />} />
       <Route element={<RequireCognitoAuth />}>
         <Route path="/aws" element={<AwsPortalPage />} />

@@ -63,7 +63,7 @@ export function AwsPortalPage() {
           <Link className="button button--secondary" to="/dashboard">
             Volver a Pedidos360
           </Link>
-          <button className="button button--ghost" type="button" onClick={() => void logout()}>
+          <button className="button button--ghost" type="button" onClick={() => void logout("/logout/continuar")}>
             Salir de Cognito
           </button>
         </div>

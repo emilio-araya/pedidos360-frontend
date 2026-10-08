@@ -56,7 +56,7 @@ Las pruebas cubren claims, roles, transiciones, cliente HTTP, servicios, login, 
 
 | Métrica | Valor | Umbral |
 |---|---|---|
-| Pruebas | 58 | — |
+| Pruebas | 62 | — |
 | Líneas | 78.4% | 75% |
 | Sentencias | 76.25% | 70% |
 | Funciones | 79.74% | 70% |

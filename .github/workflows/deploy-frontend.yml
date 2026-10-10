@@ -1,15 +1,8 @@
 name: Deploy frontend to S3 and CloudFront
 
+# Manual only: the AWS lab account and its CloudFront distribution are not always available.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'src/**'
-      - 'public/**'
-      - 'scripts/**'
-      - 'package.json'
-      - 'package-lock.json'
 
 permissions:
   contents: read

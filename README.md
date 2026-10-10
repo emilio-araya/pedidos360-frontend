@@ -85,3 +85,7 @@ docker run --rm -p 8080:80 pedidos360-frontend
 ```
 
 Para el stack integrado, `docker-compose.yml` configura los build args y publica únicamente el frontend en loopback. En AWS, `API_BASE_URL` debe ser el endpoint HTTPS de API Gateway; nunca una URL privada de BFF, orders, catalog u Oracle.
+
+## Despliegue en AWS
+
+El workflow `Deploy frontend to S3 and CloudFront` se ejecuta solo a mano (Actions → Run workflow), porque depende de una cuenta de laboratorio de AWS que no siempre está activa. Usa OIDC para autenticarse y lee la configuración desde las variables del environment `aws-production`.

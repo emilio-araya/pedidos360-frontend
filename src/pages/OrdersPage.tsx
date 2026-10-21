@@ -11,6 +11,8 @@ interface DraftItem {
   quantity: number;
 }
 
+const PAGE_SIZE = 20;
+
 const currency = new Intl.NumberFormat("es-CO", {
   style: "currency",
   currency: "COP",
@@ -30,6 +32,9 @@ export function OrdersPage() {
     [getAccessToken],
   );
   const [orders, setOrders] = useState<Order[]>([]);
+  const [page, setPage] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
   const [items, setItems] = useState<DraftItem[]>([
     { productId: "", quantity: 1 },
@@ -43,16 +48,20 @@ export function OrdersPage() {
   const [productsError, setProductsError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  async function load() {
+  async function load(targetPage: number) {
     setLoading(true);
     setProductsLoading(true);
     setError(null);
     setProductsError(null);
     const [ordersResult, productsResult] = await Promise.allSettled([
-      ordersService.list(),
+      ordersService.list({ page: targetPage, size: PAGE_SIZE }),
       catalogService.list(),
     ]);
-    if (ordersResult.status === "fulfilled") setOrders(ordersResult.value);
+    if (ordersResult.status === "fulfilled") {
+      setOrders(ordersResult.value.content);
+      setTotalElements(ordersResult.value.totalElements);
+      setTotalPages(ordersResult.value.totalPages);
+    }
     else
       setError(
         ordersResult.reason instanceof Error
@@ -72,8 +81,8 @@ export function OrdersPage() {
   }
 
   useEffect(() => {
-    void load();
-  }, [ordersService, catalogService]);
+    void load(page);
+  }, [ordersService, catalogService, page]);
 
   function updateItem(index: number, patch: Partial<DraftItem>) {
     setItems((current) =>
@@ -117,12 +126,14 @@ export function OrdersPage() {
         items,
         notes: notes.trim() || undefined,
       });
-      setOrders((current) => [created, ...current]);
       setItems([{ productId: "", quantity: 1 }]);
       setNotes("");
       setMessage(
         `Pedido ${created.orderNumber || created.id} creado correctamente.`,
       );
+      // El pedido nuevo es el más reciente: se muestra volviendo a la primera página.
+      if (page === 0) void load(0);
+      else setPage(0);
     } catch (reason) {
       setError(
         reason instanceof Error
@@ -200,13 +211,13 @@ export function OrdersPage() {
         <button
           className="button button--secondary"
           type="button"
-          onClick={() => void load()}
+          onClick={() => void load(page)}
           disabled={loading || productsLoading}
         >
           Actualizar
         </button>
       </div>
-      {error && <ErrorState message={error} onRetry={() => void load()} />}
+      {error && <ErrorState message={error} onRetry={() => void load(page)} />}
       {message && (
         <div className="alert alert--success" role="status">
           {message}
@@ -226,7 +237,7 @@ export function OrdersPage() {
           </div>
           <div className="card__body">
             {productsError && (
-              <ErrorState message={productsError} onRetry={() => void load()} />
+              <ErrorState message={productsError} onRetry={() => void load(page)} />
             )}
             {productsLoading ? (
               <LoadingState label="Cargando productos…" />
@@ -420,6 +431,29 @@ export function OrdersPage() {
                     </div>
                   </article>
                 ))}
+              </div>
+            )}
+            {!loading && totalPages > 0 && (
+              <div className="orders-pager">
+                <button
+                  className="button button--small"
+                  type="button"
+                  onClick={() => setPage((current) => Math.max(0, current - 1))}
+                  disabled={page === 0}
+                >
+                  Anterior
+                </button>
+                <span className="muted">
+                  Página {page + 1} de {totalPages} · {totalElements} pedido(s)
+                </span>
+                <button
+                  className="button button--small"
+                  type="button"
+                  onClick={() => setPage((current) => current + 1)}
+                  disabled={page + 1 >= totalPages}
+                >
+                  Siguiente
+                </button>
               </div>
             )}
           </div>

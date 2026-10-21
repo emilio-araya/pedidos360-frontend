@@ -46,6 +46,7 @@ export function OrdersPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [productsError, setProductsError] = useState<string | null>(null);
+  const [productsWarning, setProductsWarning] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   async function load(targetPage: number) {
@@ -55,7 +56,7 @@ export function OrdersPage() {
     setProductsError(null);
     const [ordersResult, productsResult] = await Promise.allSettled([
       ordersService.list({ page: targetPage, size: PAGE_SIZE }),
-      catalogService.list(),
+      catalogService.listAll(),
     ]);
     if (ordersResult.status === "fulfilled") {
       setOrders(ordersResult.value.content);
@@ -68,9 +69,16 @@ export function OrdersPage() {
           ? ordersResult.reason.message
           : "No fue posible cargar los pedidos.",
       );
-    if (productsResult.status === "fulfilled")
-      setProducts(productsResult.value.filter((product) => product.active));
-    else
+    if (productsResult.status === "fulfilled") {
+      setProducts(
+        productsResult.value.products.filter((product) => product.active),
+      );
+      setProductsWarning(
+        productsResult.value.truncated
+          ? "El catálogo supera el máximo que el selector puede cargar: faltan productos en la lista."
+          : null,
+      );
+    } else
       setProductsError(
         productsResult.reason instanceof Error
           ? productsResult.reason.message
@@ -247,6 +255,9 @@ export function OrdersPage() {
               </div>
             ) : (
               <>
+                {productsWarning && (
+                  <div className="alert alert--info">{productsWarning}</div>
+                )}
                 <div className="items-editor">
                   {items.map((item, index) => (
                     <div className="item-row" key={index}>

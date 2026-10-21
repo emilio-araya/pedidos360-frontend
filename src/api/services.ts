@@ -47,6 +47,12 @@ export interface Page<T> {
   totalPages: number;
 }
 
+export interface CatalogAggregate {
+  products: Product[];
+  /** true cuando el volumen supera el tope y la lista es parcial. */
+  truncated: boolean;
+}
+
 export interface OrderAggregate {
   orders: Order[];
   /** true cuando el volumen supera el tope y los totales son parciales. */
@@ -69,9 +75,12 @@ function normalizeOrders(value: unknown): Order[] {
     : [];
 }
 
-function normalizeOrderPage(value: unknown): Page<Order> {
+function normalizePage<T>(
+  value: unknown,
+  normalize: (item: unknown) => T,
+): Page<T> {
   const raw = (value ?? {}) as Record<string, unknown>;
-  const content = normalizeOrders(raw.content);
+  const content = Array.isArray(raw.content) ? raw.content.map(normalize) : [];
   return {
     content,
     page: typeof raw.page === "number" ? raw.page : 0,
@@ -89,6 +98,13 @@ function normalizeOrderPage(value: unknown): Page<Order> {
   };
 }
 
+function buildPageQuery(query: PageQuery): string {
+  const search = new URLSearchParams();
+  if (query.page !== undefined) search.set("page", String(query.page));
+  if (query.size !== undefined) search.set("size", String(query.size));
+  return search.size > 0 ? `?${search.toString()}` : "";
+}
+
 function normalizeProducts(value: unknown): Product[] {
   return Array.isArray(value)
     ? value.map((product) => normalizeProduct(product as Product))
@@ -104,12 +120,12 @@ export function createOrdersService(
     (access.isClient && order.customerId === access.oid);
 
   async function list(query: PageQuery = {}): Promise<Page<Order>> {
-    const search = new URLSearchParams();
-    if (query.page !== undefined) search.set("page", String(query.page));
-    if (query.size !== undefined) search.set("size", String(query.size));
-    const suffix = search.size > 0 ? `?${search.toString()}` : "";
-    const page = normalizeOrderPage(
-      await apiRequest<unknown>(`/api/orders${suffix}`, await getToken()),
+    const page = normalizePage(
+      await apiRequest<unknown>(
+        `/api/orders${buildPageQuery(query)}`,
+        await getToken(),
+      ),
+      (item) => normalizeOrder(item as Order),
     );
     if (access.canManageOrders) return page;
     const content = access.oid
@@ -223,12 +239,36 @@ export function createCatalogService(
       );
   };
 
+  async function list(query: PageQuery = {}): Promise<Page<Product>> {
+    return normalizePage(
+      await apiRequest<unknown>(
+        `/api/catalog/products${buildPageQuery(query)}`,
+        await getToken(),
+      ),
+      (item) => normalizeProduct(item as Product),
+    );
+  }
+
+  /**
+   * Recorre las páginas para el selector de productos del formulario de
+   * pedidos, que necesita el catálogo completo y no una página.
+   */
+  async function listAll(): Promise<CatalogAggregate> {
+    const collected: Product[] = [];
+    let page = 0;
+    let totalPages = 1;
+    while (page < totalPages && page < MAX_PAGES_FOR_AGGREGATES) {
+      const result = await list({ page, size: MAX_PAGE_SIZE });
+      collected.push(...result.content);
+      totalPages = result.totalPages;
+      page += 1;
+    }
+    return { products: collected, truncated: page < totalPages };
+  }
+
   return {
-    async list(): Promise<Product[]> {
-      return normalizeProducts(
-        await apiRequest<unknown>("/api/catalog/products", await getToken()),
-      );
-    },
+    list,
+    listAll,
     async get(id: string): Promise<Product> {
       return normalizeProduct(
         await apiRequest<Product>(

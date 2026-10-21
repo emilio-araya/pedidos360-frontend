@@ -5,6 +5,8 @@ import { ErrorState, LoadingState } from "../components/States";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import type { Product, ProductInput } from "../types";
 
+const PAGE_SIZE = 20;
+
 const currency = new Intl.NumberFormat("es-CO", {
   style: "currency",
   currency: "COP",
@@ -37,6 +39,9 @@ export function CatalogPage() {
     [canManageCatalog, getAccessToken],
   );
   const [products, setProducts] = useState<Product[]>([]);
+  const [page, setPage] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [form, setForm] = useState<ProductForm>(emptyProduct);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,11 +53,14 @@ export function CatalogPage() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  async function load() {
+  async function load(targetPage: number) {
     setLoading(true);
     setError(null);
     try {
-      setProducts(await service.list());
+      const result = await service.list({ page: targetPage, size: PAGE_SIZE });
+      setProducts(result.content);
+      setTotalElements(result.totalElements);
+      setTotalPages(result.totalPages);
     } catch (reason) {
       setError(
         reason instanceof Error
@@ -65,8 +73,8 @@ export function CatalogPage() {
   }
 
   useEffect(() => {
-    void load();
-  }, [service]);
+    void load(page);
+  }, [service, page]);
 
   function updateForm(patch: Partial<ProductForm>) {
     setForm((current) => ({ ...current, ...patch }));
@@ -140,13 +148,10 @@ export function CatalogPage() {
       const saved = editingId
         ? await service.update(editingId, payload)
         : await service.create(payload);
-      setProducts((current) =>
-        editingId
-          ? current.map((product) =>
-              product.id === saved.id ? saved : product,
-            )
-          : [saved, ...current],
-      );
+      // Con paginación el orden lo define el servidor: se recarga en lugar de
+      // insertar localmente, que dejaría la página desordenada y el total viejo.
+      if (!editingId && page !== 0) setPage(0);
+      else void load(page);
       setMessage(
         `${saved.name} ${editingId ? "actualizado" : "creado"} correctamente.`,
       );
@@ -170,9 +175,9 @@ export function CatalogPage() {
     setMessage(null);
     try {
       await service.remove(product.id);
-      setProducts((current) =>
-        current.filter((item) => item.id !== product.id),
-      );
+      const lastOnPage = products.length === 1 && page > 0;
+      if (lastOnPage) setPage(page - 1);
+      else void load(page);
       if (editingId === product.id) {
         setEditingId(null);
         setForm({ ...emptyProduct });
@@ -238,7 +243,7 @@ export function CatalogPage() {
           + Nuevo producto
         </button>
       </div>
-      {error && <ErrorState message={error} onRetry={() => void load()} />}
+      {error && <ErrorState message={error} onRetry={() => void load(page)} />}
       {message && (
         <div className="alert alert--success" role="status">
           {message}
@@ -421,7 +426,7 @@ export function CatalogPage() {
           <button
             className="button button--ghost button--small"
             type="button"
-            onClick={() => void load()}
+            onClick={() => void load(page)}
             disabled={loading}
           >
             {loading ? "Actualizando…" : "Actualizar"}
@@ -509,6 +514,29 @@ export function CatalogPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+        {!loading && totalPages > 0 && (
+          <div className="orders-pager">
+            <button
+              className="button button--small"
+              type="button"
+              onClick={() => setPage((current) => Math.max(0, current - 1))}
+              disabled={page === 0}
+            >
+              Anterior
+            </button>
+            <span className="muted">
+              Página {page + 1} de {totalPages} · {totalElements} producto(s)
+            </span>
+            <button
+              className="button button--small"
+              type="button"
+              onClick={() => setPage((current) => current + 1)}
+              disabled={page + 1 >= totalPages}
+            >
+              Siguiente
+            </button>
           </div>
         )}
       </section>

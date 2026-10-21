@@ -30,6 +30,7 @@ export function DashboardPage() {
     getAccessToken,
   } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [truncated, setTruncated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const service = useMemo(
@@ -42,7 +43,9 @@ export function DashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      setOrders(await service.list());
+      const result = await service.listAll();
+      setOrders(result.orders);
+      setTruncated(result.truncated);
     } catch (reason) {
       setError(
         reason instanceof Error
@@ -114,6 +117,12 @@ export function DashboardPage() {
               <span className="stat-card__hint">{delivered} entregados</span>
             </article>
           </div>
+          {truncated && (
+            <p className="muted">
+              Los totales se calculan sobre los pedidos más recientes; el
+              volumen supera el límite de la vista.
+            </p>
+          )}
           <div className="dashboard-grid">
             <section className="card recent-card">
               <div className="card__header">

@@ -39,10 +39,54 @@ export function normalizeProduct(product: Product): Product {
   };
 }
 
+export interface Page<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface OrderAggregate {
+  orders: Order[];
+  /** true cuando el volumen supera el tope y los totales son parciales. */
+  truncated: boolean;
+}
+
+export interface PageQuery {
+  page?: number;
+  size?: number;
+}
+
+/** Tope del backend: `size` fuera de este rango responde 400. */
+export const MAX_PAGE_SIZE = 100;
+/** Límite del dashboard para no encadenar requests sin control. */
+const MAX_PAGES_FOR_AGGREGATES = 10;
+
 function normalizeOrders(value: unknown): Order[] {
   return Array.isArray(value)
     ? value.map((order) => normalizeOrder(order as Order))
     : [];
+}
+
+function normalizeOrderPage(value: unknown): Page<Order> {
+  const raw = (value ?? {}) as Record<string, unknown>;
+  const content = normalizeOrders(raw.content);
+  return {
+    content,
+    page: typeof raw.page === "number" ? raw.page : 0,
+    size: typeof raw.size === "number" ? raw.size : content.length,
+    totalElements:
+      typeof raw.totalElements === "number"
+        ? raw.totalElements
+        : content.length,
+    totalPages:
+      typeof raw.totalPages === "number"
+        ? raw.totalPages
+        : content.length > 0
+          ? 1
+          : 0,
+  };
 }
 
 function normalizeProducts(value: unknown): Product[] {
@@ -59,14 +103,44 @@ export function createOrdersService(
     access.canManageOrders ||
     (access.isClient && order.customerId === access.oid);
 
+  async function list(query: PageQuery = {}): Promise<Page<Order>> {
+    const search = new URLSearchParams();
+    if (query.page !== undefined) search.set("page", String(query.page));
+    if (query.size !== undefined) search.set("size", String(query.size));
+    const suffix = search.size > 0 ? `?${search.toString()}` : "";
+    const page = normalizeOrderPage(
+      await apiRequest<unknown>(`/api/orders${suffix}`, await getToken()),
+    );
+    if (access.canManageOrders) return page;
+    const content = access.oid
+      ? page.content.filter((order) => canView(order))
+      : [];
+    return { ...page, content };
+  }
+
+  /**
+   * Recorre las páginas para los agregados del dashboard.
+   *
+   * El dashboard suma sobre todos los pedidos: con una sola página los
+   * totales serían falsos. Se corta en MAX_PAGES_FOR_AGGREGATES para que un
+   * volumen grande no dispare requests sin límite.
+   */
+  async function listAll(): Promise<OrderAggregate> {
+    const collected: Order[] = [];
+    let page = 0;
+    let totalPages = 1;
+    while (page < totalPages && page < MAX_PAGES_FOR_AGGREGATES) {
+      const result = await list({ page, size: MAX_PAGE_SIZE });
+      collected.push(...result.content);
+      totalPages = result.totalPages;
+      page += 1;
+    }
+    return { orders: collected, truncated: page < totalPages };
+  }
+
   return {
-    async list(): Promise<Order[]> {
-      const orders = normalizeOrders(
-        await apiRequest<unknown>("/api/orders", await getToken()),
-      );
-      if (access.canManageOrders) return orders;
-      return access.oid ? orders.filter((order) => canView(order)) : [];
-    },
+    list,
+    listAll,
     async get(id: string): Promise<Order> {
       const order = normalizeOrder(
         await apiRequest<Order>(

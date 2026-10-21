@@ -15,7 +15,8 @@ describe("servicios de API", () => {
     vi.stubGlobal("fetch", fetchMock);
     fetchMock.mockResolvedValue(
       new Response(
-        JSON.stringify([
+        JSON.stringify(
+          pageOf([
           {
             id: "1",
             orderNumber: "PED-1",
@@ -36,7 +37,8 @@ describe("servicios de API", () => {
             stockReserved: false,
             createdAt: "2026-01-01",
           },
-        ]),
+          ]),
+        ),
         { status: 200 },
       ),
     );
@@ -46,11 +48,11 @@ describe("servicios de API", () => {
       oid: "oid-1",
     });
 
-    const orders = await service.list();
+    const page = await service.list();
 
-    expect(orders).toHaveLength(1);
-    expect(orders[0].total).toBe(10);
-    expect(orders[0].notes).toBe("");
+    expect(page.content).toHaveLength(1);
+    expect(page.content[0].total).toBe(10);
+    expect(page.content[0].notes).toBe("");
   });
 
   it("permite a operadores consultar todos y bloquea transiciones a clientes", async () => {
@@ -151,7 +153,7 @@ describe("servicios de API", () => {
   it("retorna lista vacía cuando el cliente no tiene oid", async () => {
     vi.stubGlobal("fetch", fetchMock);
     fetchMock.mockResolvedValue(
-      new Response(JSON.stringify([{ id: "1" }]), { status: 200 }),
+      new Response(JSON.stringify(pageOf([{ id: "1" }])), { status: 200 }),
     );
     const service = createOrdersService(getToken, {
       canManageOrders: false,
@@ -159,9 +161,9 @@ describe("servicios de API", () => {
       oid: null,
     });
 
-    const orders = await service.list();
+    const page = await service.list();
 
-    expect(orders).toEqual([]);
+    expect(page.content).toEqual([]);
   });
 
   it("bloquea changeStatus para clientes", async () => {
@@ -372,8 +374,73 @@ describe("servicios de API", () => {
       oid: null,
     });
 
-    const orders = await service.list();
+    const page = await service.list();
 
-    expect(orders).toEqual([]);
+    expect(page.content).toEqual([]);
+    expect(page.totalElements).toBe(0);
+  });
+
+  it("pide la página y el tamaño indicados", async () => {
+    vi.stubGlobal("fetch", fetchMock);
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify(pageOf([])), { status: 200 }),
+    );
+    const service = createOrdersService(getToken, {
+      canManageOrders: true,
+      isClient: false,
+      oid: null,
+    });
+
+    await service.list({ page: 2, size: 50 });
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      "http://localhost:8080/api/orders?page=2&size=50",
+    );
+  });
+
+  it("listAll recorre todas las páginas para los totales del dashboard", async () => {
+    vi.stubGlobal("fetch", fetchMock);
+    fetchMock
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify(pageOf([{ id: "1" }], { page: 0, totalPages: 2 })),
+          { status: 200 },
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify(pageOf([{ id: "2" }], { page: 1, totalPages: 2 })),
+          { status: 200 },
+        ),
+      );
+    const service = createOrdersService(getToken, {
+      canManageOrders: true,
+      isClient: false,
+      oid: null,
+    });
+
+    const { orders, truncated } = await service.listAll();
+
+    expect(orders.map((order) => order.id)).toEqual(["1", "2"]);
+    expect(truncated).toBe(false);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });
+
+function pageOf(
+  content: unknown[],
+  overrides: Partial<{
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+  }> = {},
+) {
+  return {
+    content,
+    page: overrides.page ?? 0,
+    size: overrides.size ?? 20,
+    totalElements: overrides.totalElements ?? content.length,
+    totalPages: overrides.totalPages ?? 1,
+  };
+}

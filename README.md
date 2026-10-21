@@ -52,15 +52,17 @@ npm run test:coverage
 npm run build
 ```
 
-Las pruebas cubren claims, roles, transiciones, cliente HTTP, servicios, login, callback y sesión Cognito. El build de Vite genera `dist/`.
+Las pruebas cubren claims, roles, transiciones, cliente HTTP, servicios, paginación de pedidos, login, callback y sesión Cognito. El build de Vite genera `dist/`.
+
+El listado de pedidos se pide paginado (`page`/`size`, 20 por página) y muestra controles de navegación con el total. El dashboard recorre las páginas para calcular sus agregados y avisa cuando el volumen supera el tope de la vista, en lugar de mostrar totales parciales como si fueran completos.
 
 | Métrica | Valor | Umbral |
 |---|---|---|
-| Pruebas | 62 | — |
-| Líneas | 78.4% | 75% |
-| Sentencias | 76.25% | 70% |
-| Funciones | 79.74% | 70% |
-| Ramas | 67.21% | 60% |
+| Pruebas | 64 | — |
+| Líneas | 78.2% | 75% |
+| Sentencias | 76.34% | 70% |
+| Funciones | 80.48% | 70% |
+| Ramas | 69% | 60% |
 
 La CI ejecuta `npm run test:coverage` en cada push y pull request, muestra el resumen en la página del workflow y adjunta el informe HTML como artefacto. Los umbrales están en `vitest.config.ts` y el comando falla si la cobertura baja de ellos.
 

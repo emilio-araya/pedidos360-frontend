@@ -398,6 +398,44 @@ describe("servicios de API", () => {
     );
   });
 
+  it("pide el listado de productos paginado", async () => {
+    vi.stubGlobal("fetch", fetchMock);
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify(pageOf([{ id: "p1" }])), { status: 200 }),
+    );
+    const service = createCatalogService(getToken, { canManageCatalog: false });
+
+    await service.list({ page: 1, size: 10 });
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      "http://localhost:8080/api/catalog/products?page=1&size=10",
+    );
+  });
+
+  it("listAll del catálogo recorre todas las páginas para el selector de productos", async () => {
+    vi.stubGlobal("fetch", fetchMock);
+    fetchMock
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify(pageOf([{ id: "p1" }], { page: 0, totalPages: 2 })),
+          { status: 200 },
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify(pageOf([{ id: "p2" }], { page: 1, totalPages: 2 })),
+          { status: 200 },
+        ),
+      );
+    const service = createCatalogService(getToken, { canManageCatalog: false });
+
+    const { products, truncated } = await service.listAll();
+
+    expect(products.map((product) => product.id)).toEqual(["p1", "p2"]);
+    expect(truncated).toBe(false);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it("listAll recorre todas las páginas para los totales del dashboard", async () => {
     vi.stubGlobal("fetch", fetchMock);
     fetchMock

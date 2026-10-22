@@ -324,3 +324,21 @@ export function createCatalogService(
     },
   };
 }
+
+/**
+ * Vitrina pública: lee el catálogo sin sesión. Expone solo lectura, que es
+ * lo único que el backend permite de forma anónima; cualquier mutación
+ * sigue exigiendo un token con rol operativo.
+ */
+export function createPublicCatalogService() {
+  return {
+    async list(query: PageQuery = {}): Promise<Page<Product>> {
+      return normalizePage(
+        await apiRequest<unknown>(
+          `/api/catalog/products${buildPageQuery(query)}`,
+        ),
+        (item) => normalizeProduct(item as Product),
+      );
+    },
+  };
+}

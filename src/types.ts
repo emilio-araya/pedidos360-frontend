@@ -30,6 +30,7 @@ export interface ProductInput {
   price: number;
   stock: number;
   active: boolean;
+  imageUrl?: string | null;
 }
 
 export interface OrderItem {

@@ -20,7 +20,11 @@ interface ProductForm {
   price: string;
   stock: string;
   active: boolean;
+  imageUrl: string;
 }
+
+/** Misma regla que el backend: https o ruta propia del sitio, nunca "//host". */
+const IMAGE_URL_PATTERN = /^(https:\/\/\S+|\/[^/\s]\S*)$/;
 
 const emptyProduct: ProductForm = {
   sku: "",
@@ -29,6 +33,7 @@ const emptyProduct: ProductForm = {
   price: "0",
   stock: "0",
   active: true,
+  imageUrl: "",
 };
 
 export function CatalogPage() {
@@ -96,6 +101,7 @@ export function CatalogPage() {
       price: String(product.price),
       stock: String(product.stock),
       active: product.active,
+      imageUrl: product.imageUrl ?? "",
     });
     setError(null);
     setMessage(null);
@@ -122,7 +128,17 @@ export function CatalogPage() {
       price: Number(form.price),
       stock: Number(form.stock),
       active: form.active,
+      imageUrl: form.imageUrl.trim() || null,
     };
+    if (
+      payload.imageUrl &&
+      (payload.imageUrl.length > 512 || !IMAGE_URL_PATTERN.test(payload.imageUrl))
+    ) {
+      setError(
+        "La imagen debe ser una URL https:// o una ruta del sitio como /img/foto.jpg.",
+      );
+      return;
+    }
     const description = payload.description ?? "";
     if (
       !form.price.trim() ||
@@ -301,6 +317,20 @@ export function CatalogPage() {
                     updateForm({ description: event.target.value })
                   }
                   placeholder="Descripción comercial"
+                />
+              </div>
+              <div className="form-field form-field--full">
+                <label htmlFor="product-image">Imagen (URL)</label>
+                <input
+                  id="product-image"
+                  type="text"
+                  inputMode="url"
+                  maxLength={512}
+                  value={form.imageUrl}
+                  onChange={(event) =>
+                    updateForm({ imageUrl: event.target.value })
+                  }
+                  placeholder="https://… o /img/producto.jpg"
                 />
               </div>
               <div className="form-field">

@@ -36,6 +36,7 @@ export function normalizeProduct(product: Product): Product {
     price: Number(product.price ?? 0),
     stock: Number(product.stock ?? 0),
     active: product.active !== false,
+    imageUrl: product.imageUrl ?? null,
   };
 }
 
@@ -227,6 +228,23 @@ export function createOrdersService(
   };
 }
 
+/**
+ * Página del catálogo. Es la única lectura que el backend acepta sin sesión:
+ * la vitrina la llama con `null` y la administración con su token.
+ */
+export async function listProducts(
+  query: PageQuery,
+  token: string | null,
+): Promise<Page<Product>> {
+  return normalizePage(
+    await apiRequest<unknown>(
+      `/api/catalog/products${buildPageQuery(query)}`,
+      token,
+    ),
+    (item) => normalizeProduct(item as Product),
+  );
+}
+
 export function createCatalogService(
   getToken: () => Promise<string>,
   access: CatalogAccess,
@@ -240,13 +258,7 @@ export function createCatalogService(
   };
 
   async function list(query: PageQuery = {}): Promise<Page<Product>> {
-    return normalizePage(
-      await apiRequest<unknown>(
-        `/api/catalog/products${buildPageQuery(query)}`,
-        await getToken(),
-      ),
-      (item) => normalizeProduct(item as Product),
-    );
+    return listProducts(query, await getToken());
   }
 
   /**

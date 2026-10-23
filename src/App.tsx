@@ -10,6 +10,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { OrdersPage } from "./pages/OrdersPage";
 import { CatalogPage } from "./pages/CatalogPage";
+import { StorePage } from "./pages/StorePage";
 
 export function App() {
   return (
@@ -29,8 +30,8 @@ export function App() {
           </Route>
         </Route>
       </Route>
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/" element={<StorePage />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

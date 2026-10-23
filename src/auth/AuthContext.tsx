@@ -138,7 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const origin = typeof window === "undefined" ? "" : window.location.origin;
     await instance.loginRedirect({
       scopes: [environment.apiScope],
-      redirectStartPage: `${origin}/dashboard`,
+      redirectStartPage: `${origin}/`,
     });
   }, [instance]);
 

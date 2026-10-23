@@ -94,6 +94,7 @@ describe("servicios de API", () => {
         price: 1,
         stock: 1,
         active: true,
+        imageUrl: null,
       }),
     ).rejects.toMatchObject({ status: 403 });
     expect(fetchMock).not.toHaveBeenCalled();
@@ -319,6 +320,7 @@ describe("servicios de API", () => {
         price: 10,
         stock: 5,
         active: true,
+        imageUrl: null,
       }),
     ).rejects.toMatchObject({ status: 403 });
     expect(fetchMock).not.toHaveBeenCalled();
@@ -357,6 +359,7 @@ describe("servicios de API", () => {
       price: 10,
       stock: 5,
       active: true,
+      imageUrl: null,
     });
 
     expect(product.id).toBe("p1");

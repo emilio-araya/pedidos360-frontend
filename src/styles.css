@@ -79,6 +79,14 @@ button:disabled {
 a {
   color: inherit;
 }
+::selection {
+  background: rgba(47, 124, 246, 0.22);
+  color: var(--ink);
+}
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
 .muted {
   color: var(--muted);
 }

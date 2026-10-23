@@ -1,3 +1,4 @@
+import { Brand } from "./Brand";
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
@@ -63,14 +64,7 @@ export function AppShell() {
     <div className="app-frame">
       <header className="topbar">
         <div className="topbar__inner">
-          <NavLink className="brand" to="/dashboard">
-            <span className="brand__mark">P</span>
-            <span>
-              <strong>Pedidos</strong>
-              <b>360</b>
-            </span>
-            <small>Operación simple, en un solo lugar</small>
-          </NavLink>
+          <Brand to="/dashboard" tagline="Operación simple, en un solo lugar" />
           <nav className="main-nav" aria-label="Navegación principal">
             <NavLink to="/dashboard" end>
               Dashboard

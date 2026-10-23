@@ -57,7 +57,7 @@ describe("StorePage", () => {
     expect(mockedApiRequest.mock.calls[0][0]).toBe(
       "/api/catalog/products?page=0&size=12",
     );
-    expect(mockedApiRequest.mock.calls[0][1]).toBeUndefined();
+    expect(mockedApiRequest.mock.calls[0][1]).toBeNull();
 
     await userEvent.click(screen.getByRole("button", { name: "Crear pedido" }));
 

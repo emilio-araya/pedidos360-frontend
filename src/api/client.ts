@@ -36,13 +36,17 @@ function parsePayload(text: string): unknown {
 
 export async function apiRequest<T>(
   path: string,
-  token?: string | null,
+  /**
+   * `null` declara una lectura pública a propósito. Un string vacío es una
+   * sesión perdida y se corta acá, sin salir a la red.
+   */
+  token: string | null,
   init: RequestInit = {},
 ): Promise<T> {
+  if (token === "") throw new ApiError("No hay una sesión activa.", 401);
+
   const headers = new Headers(init.headers);
-  // La vitrina del catalogo se lee sin sesion: cuando no hay token la
-  // peticion viaja anonima y es el backend quien decide si la acepta.
-  if (token) headers.set("Authorization", `Bearer ${token}`);
+  if (token !== null) headers.set("Authorization", `Bearer ${token}`);
   headers.set("Accept", "application/json");
   if (typeof init.body === "string" && !headers.has("Content-Type"))
     headers.set("Content-Type", "application/json");

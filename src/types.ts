@@ -19,8 +19,8 @@ export interface Product {
   price: number;
   stock: number;
   active: boolean;
-  /** Foto del producto: https o ruta propia del sitio. Opcional. */
-  imageUrl?: string | null;
+  /** Foto del producto (https o ruta del sitio); null si no tiene. */
+  imageUrl: string | null;
 }
 
 export interface ProductInput {
@@ -30,7 +30,7 @@ export interface ProductInput {
   price: number;
   stock: number;
   active: boolean;
-  imageUrl?: string | null;
+  imageUrl: string | null;
 }
 
 export interface OrderItem {

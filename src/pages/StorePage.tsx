@@ -1,14 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiError } from "../api/client";
-import { createPublicCatalogService } from "../api/services";
+import { listProducts } from "../api/services";
 import type { Page } from "../api/services";
-import type { Product } from "../types";
 import { useAuth } from "../auth/AuthContext";
+import { Brand } from "../components/Brand";
+import type { Product } from "../types";
+import "./StorePage.css";
 
 const PAGE_SIZE = 12;
 const SKELETON_CARDS = 6;
-const catalog = createPublicCatalogService();
+const SHOWCASE_SIZE = 3;
+const LOW_STOCK = 5;
 
 const priceFormat = new Intl.NumberFormat("es-CL", {
   style: "currency",
@@ -16,46 +19,12 @@ const priceFormat = new Intl.NumberFormat("es-CL", {
   maximumFractionDigits: 0,
 });
 
-function stockLabel(stock: number): string {
-  if (stock <= 0) return "Sin stock";
-  if (stock < 5) return `Últimas ${stock}`;
-  return `${stock} disponibles`;
-}
+type StockTone = "in" | "low" | "out";
 
-function stockTone(stock: number): string {
-  if (stock <= 0) return "store-stock--out";
-  if (stock < 5) return "store-stock--low";
-  return "store-stock--in";
-}
-
-/**
- * Foto del producto o, si no tiene o no carga, una placa con su inicial.
- */
-function ProductPlate({ product }: { product: Product }) {
-  const [failed, setFailed] = useState(false);
-
-  if (product.imageUrl && !failed) {
-    return (
-      <div className="store-card__plate store-card__plate--photo">
-        <img
-          src={product.imageUrl}
-          alt={product.name}
-          loading="lazy"
-          decoding="async"
-          onError={() => setFailed(true)}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="store-card__plate" aria-hidden="true">
-      <span className="store-monogram">
-        {product.name.trim().charAt(0).toUpperCase()}
-      </span>
-      <span className="store-sku">{product.sku}</span>
-    </div>
-  );
+function stockStatus(stock: number): { label: string; tone: StockTone } {
+  if (stock <= 0) return { label: "Sin stock", tone: "out" };
+  if (stock < LOW_STOCK) return { label: `Últimas ${stock}`, tone: "low" };
+  return { label: `${stock} disponibles`, tone: "in" };
 }
 
 /**
@@ -74,7 +43,7 @@ export function StorePage() {
     setLoading(true);
     setError("");
     try {
-      setData(await catalog.list({ page: target, size: PAGE_SIZE }));
+      setData(await listProducts({ page: target, size: PAGE_SIZE }, null));
     } catch (cause) {
       setError(
         cause instanceof ApiError
@@ -101,19 +70,16 @@ export function StorePage() {
   const products = data?.content ?? [];
   const totalPages = data?.totalPages ?? 0;
   const totalElements = data?.totalElements ?? 0;
+  const featured = products
+    .filter((product) => product.imageUrl)
+    .slice(0, SHOWCASE_SIZE);
+  const showShowcase = loading || featured.length > 0;
 
   return (
-    <div className="app-frame">
+    <div className="app-frame store">
       <header className="topbar">
         <div className="topbar__inner">
-          <span className="brand">
-            <span className="brand__mark" aria-hidden="true">
-              P
-            </span>
-            <span>
-              Pedidos<b>360</b>
-            </span>
-          </span>
+          <Brand to="/" />
           <nav className="store-nav" aria-label="Sesión">
             {isLoading ? null : isAuthenticated ? (
               <>
@@ -146,118 +112,214 @@ export function StorePage() {
       </header>
 
       <section className="store-hero">
-        <div className="store-hero__inner">
-          <h1>
-            Mira primero.
-            <br />
-            Después decides.
-          </h1>
-          <p className="store-hero__lead">
-            El catálogo es abierto: puedes recorrer los productos sin crear una
-            cuenta. Solo al crear un pedido te pedimos iniciar sesión.
-          </p>
-          <button
-            type="button"
-            className="button store-hero__cta"
-            onClick={() => void startOrder()}
-          >
-            Crear pedido
-          </button>
+        <div
+          className={`store-hero__inner${showShowcase ? "" : " store-hero__inner--solo"}`}
+        >
+          <div>
+            <h1>
+              Mira primero.
+              <br />
+              <span>Después decides.</span>
+            </h1>
+            <p className="store-hero__lead">
+              El catálogo es abierto: puedes recorrer los productos sin crear
+              una cuenta. Solo al crear un pedido te pedimos iniciar sesión.
+            </p>
+            <div className="store-hero__actions">
+              <button
+                type="button"
+                className="button store-hero__cta"
+                onClick={() => void startOrder()}
+              >
+                Crear pedido
+              </button>
+              <a className="store-hero__link" href="#catalogo">
+                Ver catálogo
+              </a>
+            </div>
+          </div>
+          {showShowcase ? (
+            <Showcase products={featured} loading={loading} />
+          ) : null}
         </div>
       </section>
 
-      <main className="store-main">
-        <section className="store-shelf">
-          <header className="store-shelf__head">
-            <h2>Catálogo</h2>
-            {data ? (
-              <span className="store-count">
-                {totalElements}{" "}
-                {totalElements === 1 ? "producto" : "productos"}
-              </span>
-            ) : null}
-          </header>
-
-          {error ? (
-            <div className="alert" role="alert">
-              <span>{error}</span>
-              <button
-                type="button"
-                className="nav-button"
-                onClick={() => void load(page)}
-              >
-                Reintentar
-              </button>
-            </div>
+      <main className="store-main" id="catalogo">
+        <header className="store-shelf__head">
+          <h2>Catálogo</h2>
+          {data ? (
+            <span className="store-count">
+              {totalElements} {totalElements === 1 ? "producto" : "productos"}
+            </span>
           ) : null}
+        </header>
 
-          {loading ? (
-            <div className="store-grid" aria-busy="true" aria-live="polite">
-              {Array.from({ length: SKELETON_CARDS }).map((_, index) => (
-                <div
-                  className="store-card store-card--ghost"
-                  key={`skeleton-${index}`}
-                >
-                  <div className="store-skeleton store-skeleton--banner" />
-                  <div className="store-skeleton store-skeleton--line" />
-                  <div className="store-skeleton store-skeleton--line store-skeleton--short" />
-                </div>
-              ))}
-            </div>
-          ) : products.length === 0 ? (
-            <div className="empty-state store-empty">
-              <strong>Todavía no hay productos publicados</strong>
-              <p>Vuelve en unos minutos o consulta con el equipo de la tienda.</p>
-            </div>
-          ) : (
-            <div className="store-grid">
-              {products.map((product) => (
-                <article className="store-card" key={product.id}>
-                  <ProductPlate product={product} />
-                  <div className="store-card__body">
-                    <h3>{product.name}</h3>
-                    {product.description ? (
-                      <p className="store-card__desc">{product.description}</p>
-                    ) : null}
-                  </div>
-                  <div className="store-card__foot">
-                    <span className="store-price">
-                      {priceFormat.format(product.price)}
-                    </span>
-                    <span className={`store-stock ${stockTone(product.stock)}`}>
-                      {stockLabel(product.stock)}
-                    </span>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
+        {error ? (
+          <div className="alert" role="alert">
+            <span>{error}</span>
+            <button
+              type="button"
+              className="nav-button"
+              onClick={() => void load(page)}
+            >
+              Reintentar
+            </button>
+          </div>
+        ) : null}
 
-          {totalPages > 1 ? (
-            <nav className="store-pager" aria-label="Paginación del catálogo">
-              <button
-                type="button"
-                className="button button--ghost button--small"
-                disabled={page === 0}
-                onClick={() => setPage((current) => Math.max(0, current - 1))}
-              >
-                Anterior
-              </button>
-              <span className="store-pager__pos">
-                Página <strong>{page + 1}</strong> de {totalPages}
-              </span>
-              <button
-                type="button"
-                className="button button--ghost button--small"
-                disabled={page + 1 >= totalPages}
-                onClick={() => setPage((current) => current + 1)}
-              >
-                Siguiente
-              </button>
-            </nav>
-          ) : null}
-        </section>
+        {loading ? (
+          <div className="store-grid" aria-busy="true" aria-live="polite">
+            {Array.from({ length: SKELETON_CARDS }).map((_, index) => (
+              <div className="store-card store-card--ghost" key={index}>
+                <div className="store-skeleton store-skeleton--banner" />
+                <div className="store-skeleton store-skeleton--line" />
+                <div className="store-skeleton store-skeleton--line store-skeleton--short" />
+              </div>
+            ))}
+          </div>
+        ) : products.length === 0 ? (
+          <div className="empty-state store-empty">
+            <strong>Todavía no hay productos publicados</strong>
+            <p>Vuelve en unos minutos o consulta con el equipo de la tienda.</p>
+          </div>
+        ) : (
+          <div className="store-grid">
+            {products.map((product) => (
+              <ProductCard product={product} key={product.id} />
+            ))}
+          </div>
+        )}
+
+        {totalPages > 1 ? (
+          <nav className="store-pager" aria-label="Paginación del catálogo">
+            <button
+              type="button"
+              className="button button--ghost button--small"
+              disabled={page === 0}
+              onClick={() => setPage((current) => Math.max(0, current - 1))}
+            >
+              Anterior
+            </button>
+            <span className="store-pager__pos">
+              Página <strong>{page + 1}</strong> de {totalPages}
+            </span>
+            <button
+              type="button"
+              className="button button--ghost button--small"
+              disabled={page + 1 >= totalPages}
+              onClick={() => setPage((current) => current + 1)}
+            >
+              Siguiente
+            </button>
+          </nav>
+        ) : null}
       </main>
+
+      <footer className="store-footer">
+        <div className="store-footer__inner">
+          <span>Pedidos360 · Catálogo público</span>
+          <span>
+            Fotografías:{" "}
+            <a
+              href="https://commons.wikimedia.org"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Wikimedia Commons
+            </a>
+            , dominio público y CC0.
+          </span>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+/**
+ * Abanico de fotos reales en el héroe. Es decorativo: la misma información
+ * está en la grilla, por eso las imágenes no se anuncian (alt vacío).
+ */
+function Showcase({
+  products,
+  loading,
+}: {
+  products: Product[];
+  loading: boolean;
+}) {
+  if (loading) {
+    return (
+      <div className="store-showcase" data-count={SHOWCASE_SIZE} aria-hidden="true">
+        {Array.from({ length: SHOWCASE_SIZE }).map((_, index) => (
+          <div className="store-showcase__tile store-showcase__tile--ghost" key={index} />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="store-showcase" data-count={products.length} aria-hidden="true">
+      {products.map((product) => (
+        <figure className="store-showcase__tile" key={product.id}>
+          <div className="store-showcase__photo">
+            <img src={product.imageUrl ?? undefined} alt="" decoding="async" />
+          </div>
+          <figcaption className="store-showcase__caption">
+            <strong>{product.name}</strong>
+            <span>{priceFormat.format(product.price)}</span>
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+  );
+}
+
+function ProductCard({ product }: { product: Product }) {
+  const stock = stockStatus(product.stock);
+  return (
+    <article className="store-card" data-stock={stock.tone}>
+      <ProductPlate product={product} />
+      <div className="store-card__body">
+        <h3>{product.name}</h3>
+        {product.description ? (
+          <p className="store-card__desc">{product.description}</p>
+        ) : null}
+      </div>
+      <div className="store-card__foot">
+        <span className="store-price">{priceFormat.format(product.price)}</span>
+        <span className={`store-stock store-stock--${stock.tone}`}>
+          {stock.label}
+        </span>
+      </div>
+    </article>
+  );
+}
+
+/**
+ * Foto del producto o, si no tiene o no carga, una placa con su inicial.
+ */
+function ProductPlate({ product }: { product: Product }) {
+  const [failed, setFailed] = useState(false);
+
+  if (product.imageUrl && !failed) {
+    return (
+      <div className="store-card__plate store-card__plate--photo">
+        <img
+          src={product.imageUrl}
+          alt={product.name}
+          loading="lazy"
+          decoding="async"
+          onError={() => setFailed(true)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="store-card__plate" aria-hidden="true">
+      <span className="store-monogram">
+        {product.name.trim().charAt(0).toUpperCase()}
+      </span>
+      <span className="store-sku">{product.sku}</span>
     </div>
   );
 }

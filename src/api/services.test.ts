@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createCatalogService, createOrdersService } from "./services";
+import {
+  createCatalogService,
+  createOrdersService,
+  getProduct,
+} from "./services";
 
 const fetchMock = vi.fn();
 const getToken = vi.fn(async () => "test-token");
@@ -399,6 +403,33 @@ describe("servicios de API", () => {
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
       "http://localhost:8080/api/orders?page=2&size=50",
     );
+  });
+
+  it("pide un producto público sin token y lo normaliza", async () => {
+    vi.stubGlobal("fetch", fetchMock);
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          id: "p 1",
+          sku: "P-001",
+          name: "Mouse",
+          price: "19990",
+          stock: 3,
+          active: true,
+        }),
+        { status: 200 },
+      ),
+    );
+
+    const product = await getProduct("p 1", null);
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      "http://localhost:8080/api/catalog/products/p%201",
+    );
+    const headers = new Headers(fetchMock.mock.calls[0]?.[1]?.headers);
+    expect(headers.has("Authorization")).toBe(false);
+    expect(product.price).toBe(19990);
+    expect(product.imageUrl).toBeNull();
   });
 
   it("pide el listado de productos paginado", async () => {

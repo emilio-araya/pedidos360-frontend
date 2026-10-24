@@ -1,0 +1,86 @@
+.store-plate {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 130% at 12% -20%, color-mix(in srgb, var(--brand) 14%, transparent), transparent 58%),
+    linear-gradient(158deg, var(--paper-light), var(--paper-mid));
+}
+.store-plate--card {
+  aspect-ratio: 16 / 9;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, var(--surface));
+}
+.store-plate--page {
+  aspect-ratio: 4 / 3;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+}
+.store-plate--thumb {
+  width: 4.75rem;
+  aspect-ratio: 1;
+  flex: none;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+.store-plate--photo {
+  background: var(--surface);
+}
+
+/* Absoluta: la foto no define el tamaño de la placa, así la placa mantiene su
+   proporción sea la imagen vertical u horizontal. */
+.store-plate__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0.9rem 1.2rem;
+  object-fit: contain;
+  /* Las fotos vienen sobre fondo blanco: se imprimen sobre el papel en vez
+     de quedar pegadas como un recorte con borde. */
+  mix-blend-mode: multiply;
+  transition:
+    scale 420ms var(--store-ease),
+    opacity 200ms ease;
+}
+.store-plate--page .store-plate__img {
+  padding: clamp(1.5rem, 4vw, 3rem);
+}
+.store-plate--thumb .store-plate__img {
+  padding: 0.4rem;
+}
+.store-plate--thumb .store-plate__monogram {
+  font-size: 2rem;
+}
+.store-plate--thumb .store-plate__sku {
+  display: none;
+}
+.store-plate--muted .store-plate__img {
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+
+.store-plate__monogram {
+  color: var(--brand-dark);
+  font-family: var(--font-display);
+  font-size: 4rem;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.store-plate__sku {
+  position: absolute;
+  right: 1.05rem;
+  bottom: 0.85rem;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .store-plate__img {
+    transition: none;
+  }
+}

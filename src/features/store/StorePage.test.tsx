@@ -1,9 +1,16 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useParams } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useAuth } from "../auth/AuthContext";
-import { ApiError, apiRequest } from "../api/client";
+import { useAuth } from "../../auth/AuthContext";
+import { ApiError, apiRequest } from "../../api/client";
+import { CartProvider } from "./cart";
 import { StorePage } from "./StorePage";
 
 const catalog = (
@@ -21,20 +28,28 @@ const catalog = (
 /** La vitrina en su router real: así se puede comprobar a dónde navega. */
 function renderStore() {
   return render(
-    <MemoryRouter initialEntries={["/"]}>
-      <Routes>
-        <Route path="/" element={<StorePage />} />
-        <Route path="/orders" element={<div>Pedidos</div>} />
-        <Route path="/dashboard" element={<div>Panel</div>} />
-      </Routes>
-    </MemoryRouter>,
+    <CartProvider>
+      <MemoryRouter initialEntries={["/"]}>
+        <Routes>
+          <Route path="/" element={<StorePage />} />
+          <Route path="/orders" element={<div>Pedidos</div>} />
+          <Route path="/dashboard" element={<div>Panel</div>} />
+          <Route path="/producto/:id" element={<ProductStub />} />
+        </Routes>
+      </MemoryRouter>
+    </CartProvider>,
   );
 }
 
-vi.mock("../auth/AuthContext", () => ({ useAuth: vi.fn() }));
-vi.mock("../api/client", async () => {
+function ProductStub() {
+  const { id } = useParams();
+  return <div>Página del producto {id}</div>;
+}
+
+vi.mock("../../auth/AuthContext", () => ({ useAuth: vi.fn() }));
+vi.mock("../../api/client", async () => {
   const actual =
-    await vi.importActual<typeof import("../api/client")>("../api/client");
+    await vi.importActual<typeof import("../../api/client")>("../../api/client");
   return { ...actual, apiRequest: vi.fn() };
 });
 
@@ -53,7 +68,7 @@ beforeEach(() => {
 });
 
 describe("StorePage", () => {
-  it("muestra el catálogo sin sesión y pide login al crear un pedido", async () => {
+  it("muestra el catálogo sin sesión y sin pedir login", async () => {
     mockedApiRequest.mockResolvedValue({
       content: [
         {
@@ -73,9 +88,11 @@ describe("StorePage", () => {
     });
 
     render(
-      <MemoryRouter>
-        <StorePage />
-      </MemoryRouter>,
+      <CartProvider>
+        <MemoryRouter>
+          <StorePage />
+        </MemoryRouter>
+      </CartProvider>,
     );
 
     expect(await screen.findByText("Teclado")).toBeTruthy();
@@ -84,9 +101,7 @@ describe("StorePage", () => {
     );
     expect(mockedApiRequest.mock.calls[0][1]).toBeNull();
 
-    await userEvent.click(screen.getByRole("button", { name: "Crear pedido" }));
-
-    expect(login).toHaveBeenCalledTimes(1);
+    expect(login).not.toHaveBeenCalled();
   });
 
   it("muestra la foto del producto cuando el catálogo la informa", async () => {
@@ -119,9 +134,11 @@ describe("StorePage", () => {
     });
 
     render(
-      <MemoryRouter>
-        <StorePage />
-      </MemoryRouter>,
+      <CartProvider>
+        <MemoryRouter>
+          <StorePage />
+        </MemoryRouter>
+      </CartProvider>,
     );
 
     const photo = await screen.findByRole("img", { name: "Mouse inalámbrico" });
@@ -129,7 +146,7 @@ describe("StorePage", () => {
     expect(screen.getAllByRole("img")).toHaveLength(1);
   });
 
-  it("navega a los pedidos cuando la sesión ya está iniciada", async () => {
+  it("navega a los pedidos desde la barra con la sesión iniciada", async () => {
     mockedUseAuth.mockReturnValue({
       isAuthenticated: true,
       isLoading: false,
@@ -139,7 +156,7 @@ describe("StorePage", () => {
 
     renderStore();
     await userEvent.click(
-      screen.getByRole("button", { name: "Crear pedido" }),
+      screen.getByRole("button", { name: "Mis pedidos" }),
     );
 
     expect(await screen.findByText("Pedidos")).toBeTruthy();
@@ -268,5 +285,77 @@ describe("StorePage", () => {
 
     expect(screen.queryByRole("img", { name: "Teclado mecánico" })).toBeNull();
     expect(screen.getByText("P-002")).toBeTruthy();
+  });
+
+  it("lleva a la página del producto al tocar la tarjeta", async () => {
+    mockedApiRequest.mockResolvedValue(
+      catalog([
+        {
+          id: "p 5",
+          sku: "P-010",
+          name: "Teclado",
+          description: "Mecánico",
+          price: 25000,
+          stock: 3,
+          active: true,
+          imageUrl: "/img/teclado.jpg",
+        },
+      ]),
+    );
+
+    renderStore();
+    await userEvent.click(await screen.findByRole("link", { name: "Ver Teclado" }));
+
+    expect(await screen.findByText("Página del producto p 5")).toBeTruthy();
+  });
+
+  it("no muestra el estado vacío cuando falla la carga", async () => {
+    mockedApiRequest.mockRejectedValueOnce(
+      new ApiError("Catálogo no disponible.", 503),
+    );
+
+    renderStore();
+
+    expect(await screen.findByText("Catálogo no disponible.")).toBeTruthy();
+    expect(screen.queryByText("Todavía no hay productos publicados")).toBeNull();
+  });
+
+  it("ignora la respuesta de una página que llega tarde", async () => {
+    const item = (id: string, name: string) => ({
+      id,
+      sku: `SKU-${id}`,
+      name,
+      description: null,
+      price: 1000,
+      stock: 10,
+      active: true,
+      imageUrl: null,
+    });
+    const twoPages = { totalElements: 24, totalPages: 2 };
+    let resolveLate: (value: unknown) => void = () => undefined;
+    mockedApiRequest
+      .mockResolvedValueOnce(catalog([item("a", "Primera página")], twoPages))
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveLate = resolve;
+          }),
+      )
+      .mockResolvedValueOnce(
+        catalog([item("b", "Primera página otra vez")], twoPages),
+      );
+
+    renderStore();
+    await screen.findByText("Primera página");
+    await userEvent.click(screen.getByRole("button", { name: "Siguiente" }));
+    await userEvent.click(screen.getByRole("button", { name: "Anterior" }));
+    await screen.findByText("Primera página otra vez");
+
+    await act(async () => {
+      resolveLate(catalog([item("c", "Segunda página tardía")], twoPages));
+    });
+
+    expect(screen.queryByText("Segunda página tardía")).toBeNull();
+    expect(screen.getByText("Primera página otra vez")).toBeTruthy();
   });
 });

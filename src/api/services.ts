@@ -245,6 +245,19 @@ export async function listProducts(
   );
 }
 
+/** Un producto del catálogo; con `token` en `null` usa el acceso público. */
+export async function getProduct(
+  id: string,
+  token: string | null,
+): Promise<Product> {
+  return normalizeProduct(
+    await apiRequest<Product>(
+      `/api/catalog/products/${encodeURIComponent(id)}`,
+      token,
+    ),
+  );
+}
+
 export function createCatalogService(
   getToken: () => Promise<string>,
   access: CatalogAccess,
@@ -282,12 +295,7 @@ export function createCatalogService(
     list,
     listAll,
     async get(id: string): Promise<Product> {
-      return normalizeProduct(
-        await apiRequest<Product>(
-          `/api/catalog/products/${encodeURIComponent(id)}`,
-          await getToken(),
-        ),
-      );
+      return getProduct(id, await getToken());
     },
     async create(input: ProductInput): Promise<Product> {
       requireManagement();

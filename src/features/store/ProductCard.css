@@ -1,0 +1,108 @@
+.store-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: var(--surface);
+  box-shadow:
+    0 1px 1px rgba(var(--shadow-rgb), 0.06),
+    0 14px 30px -24px rgba(var(--shadow-rgb), 0.45);
+  animation: store-rise 560ms var(--store-ease) both;
+  animation-delay: calc(var(--i, 0) * 55ms);
+  transition:
+    box-shadow 240ms ease,
+    transform 240ms var(--store-ease);
+}
+.store-card:hover {
+  box-shadow:
+    0 2px 3px rgba(var(--shadow-rgb), 0.07),
+    0 26px 42px -26px rgba(var(--shadow-rgb), 0.5);
+  transform: translateY(-4px);
+}
+.store-card:hover .store-plate__img {
+  scale: 1.05;
+}
+
+/* Toda la tarjeta lleva a la página del producto; el enlace va por encima
+   del contenido para no anidar titulares dentro de un enlace. */
+.store-card__open {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+.store-card__open:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.store-card__body {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem 1.05rem 0.4rem;
+}
+.store-card__body h3 {
+  margin: 0;
+  font-size: 1.02rem;
+  letter-spacing: -0.015em;
+}
+.store-card__desc {
+  display: -webkit-box;
+  min-height: 2.55em;
+  margin: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.87rem;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.store-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: auto;
+  padding: 0.85rem 1.05rem 1.1rem;
+}
+
+.store-card--ghost {
+  gap: 0.7rem;
+  padding-bottom: 1.1rem;
+  animation: none;
+}
+.store-skeleton {
+  border-radius: 0.5rem;
+}
+.store-skeleton--banner {
+  aspect-ratio: 16 / 9;
+  border-radius: 0;
+}
+.store-skeleton--line {
+  height: 0.72rem;
+  margin: 0 1.05rem;
+}
+.store-skeleton--short {
+  width: 42%;
+}
+
+@keyframes store-rise {
+  from {
+    opacity: 0;
+    translate: 0 0.9rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .store-card {
+    animation: none;
+    transition: none;
+  }
+  .store-card:hover {
+    transform: none;
+  }
+  .store-card:hover .store-plate__img {
+    scale: none;
+  }
+}

@@ -14,6 +14,7 @@ import {
 } from "@azure/msal-browser";
 import { useMsal } from "@azure/msal-react";
 import { environment } from "../config/environment";
+import { rememberLoginReturn } from "./loginReturn";
 import type { AppRole } from "../types";
 import {
   claimsFromAccessToken,
@@ -33,7 +34,8 @@ interface AuthContextValue {
   isClient: boolean;
   canManageCatalog: boolean;
   canManageOrders: boolean;
-  login: () => Promise<void>;
+  /** `returnTo`: ruta interna a la que volver después de iniciar sesión. */
+  login: (returnTo?: string) => Promise<void>;
   logout: () => Promise<void>;
   getAccessToken: () => Promise<string>;
 }
@@ -134,8 +136,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return result.accessToken;
   }, [instance]);
 
-  const login = useCallback(async () => {
+  const login = useCallback(async (returnTo?: string) => {
     const origin = typeof window === "undefined" ? "" : window.location.origin;
+    if (returnTo) rememberLoginReturn(returnTo);
     await instance.loginRedirect({
       scopes: [environment.apiScope],
       redirectStartPage: `${origin}/`,

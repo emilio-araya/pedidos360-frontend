@@ -1,9 +1,10 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useLocation, useParams } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError, apiRequest } from "../../api/client";
 import { useAuth } from "../../auth/AuthContext";
+import type { GuestOrder } from "../../types";
 import { CART_STORAGE_KEY, CartProvider } from "./cart";
 import type { CartLine } from "./cart";
 import { CheckoutPage } from "./CheckoutPage";
@@ -18,6 +19,8 @@ vi.mock("../../api/client", async () => {
 const mockedApiRequest = vi.mocked(apiRequest);
 const mockedUseAuth = vi.mocked(useAuth);
 
+const TOKEN = "0123456789abcdef".repeat(4);
+
 const line = (overrides: Partial<CartLine> = {}): CartLine => ({
   productId: "p1",
   sku: "P-001",
@@ -29,15 +32,17 @@ const line = (overrides: Partial<CartLine> = {}): CartLine => ({
   ...overrides,
 });
 
-const order = {
-  id: "o-1",
-  orderNumber: "PED-1",
-  customerId: "oid-1",
+const created: GuestOrder = {
+  orderNumber: "PED-7",
   status: "CREADO",
   items: [],
   total: 39980,
-  stockReserved: true,
-  createdAt: "2026-10-23T12:00:00Z",
+  notes: "",
+  cancellationReason: null,
+  maskedEmail: "l***@duocuc.cl",
+  createdAt: "2026-10-28T12:00:00Z",
+  updatedAt: "2026-10-28T12:00:00Z",
+  trackingToken: TOKEN,
 };
 
 function renderCheckout(lines: CartLine[] = [line()]) {
@@ -47,7 +52,7 @@ function renderCheckout(lines: CartLine[] = [line()]) {
       <MemoryRouter initialEntries={["/checkout"]}>
         <Routes>
           <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/pedido/:id" element={<OrderStub />} />
+          <Route path="/seguimiento/:token" element={<TrackingStub />} />
           <Route path="/carrito" element={<div>Carrito</div>} />
         </Routes>
       </MemoryRouter>
@@ -55,22 +60,36 @@ function renderCheckout(lines: CartLine[] = [line()]) {
   );
 }
 
-function OrderStub() {
-  return <div>Pedido confirmado</div>;
+function TrackingStub() {
+  const { token } = useParams();
+  const state = useLocation().state as
+    | { order?: GuestOrder; justCreated?: boolean }
+    | null;
+  return (
+    <div>
+      Seguimiento {token} · {state?.order?.orderNumber} ·{" "}
+      {state?.justCreated ? "recién creado" : "sin aviso"}
+    </div>
+  );
 }
 
 function session(overrides: Record<string, unknown> = {}) {
   mockedUseAuth.mockReturnValue({
-    isAuthenticated: true,
+    isAuthenticated: false,
     isLoading: false,
     getAccessToken: vi.fn(async () => "token"),
-    oid: "oid-1",
-    isClient: true,
+    oid: null,
+    isClient: false,
     canManageOrders: false,
     login: vi.fn(),
     ...overrides,
   } as never);
 }
+
+const emailField = () => screen.getByLabelText("Correo electrónico");
+const notesField = () => screen.getByLabelText("Notas para el pedido (opcional)");
+const confirmButton = () => screen.getByRole("button", { name: "Confirmar pedido" });
+const storedCart = () => JSON.parse(sessionStorage.getItem(CART_STORAGE_KEY) ?? "null");
 
 beforeEach(() => {
   sessionStorage.clear();
@@ -79,18 +98,16 @@ beforeEach(() => {
 });
 
 describe("CheckoutPage", () => {
-  it("pide iniciar sesión antes de confirmar y vuelve al resumen", async () => {
-    const login = vi.fn();
-    session({ isAuthenticated: false, login });
-
+  it("deja confirmar sin iniciar sesión, con correo y notas", () => {
     renderCheckout();
 
-    expect(screen.getByText("Inicia sesión para confirmar")).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Confirmar pedido" })).toBeNull();
-
-    await userEvent.click(screen.getByRole("button", { name: "Iniciar sesión para confirmar" }));
-
-    expect(login).toHaveBeenCalledWith("/checkout");
+    expect(screen.queryByText(/inicia sesión/i)).toBeNull();
+    expect(confirmButton()).toBeTruthy();
+    expect(emailField()).toHaveAttribute("type", "email");
+    expect(emailField()).toHaveAttribute("autocomplete", "email");
+    expect(emailField()).toHaveAttribute("maxlength", "254");
+    expect(emailField()).toBeRequired();
+    expect(notesField()).toBeTruthy();
   });
 
   it("resume los productos y el total antes de confirmar", () => {
@@ -98,42 +115,100 @@ describe("CheckoutPage", () => {
 
     expect(screen.getByText("Mouse inalámbrico × 2")).toBeTruthy();
     expect(screen.getByTestId("order-total").textContent).toContain("39.980");
-    expect(screen.getByLabelText("Notas para el pedido (opcional)")).toBeTruthy();
   });
 
-  it("crea el pedido con los ítems y las notas, y vacía el carrito", async () => {
-    mockedApiRequest.mockResolvedValue(order);
+  it("crea el pedido de invitado sin token, vacía el carrito y abre el seguimiento", async () => {
+    mockedApiRequest.mockResolvedValue(created);
 
     renderCheckout();
-    await userEvent.type(
-      screen.getByLabelText("Notas para el pedido (opcional)"),
-      "Entregar en la tarde",
-    );
-    await userEvent.click(screen.getByRole("button", { name: "Confirmar pedido" }));
+    await userEvent.type(emailField(), "  Lucia@duocuc.cl ");
+    await userEvent.type(notesField(), "Entregar en la tarde");
+    await userEvent.click(confirmButton());
 
-    expect(await screen.findByText("Pedido confirmado")).toBeTruthy();
-    const call = mockedApiRequest.mock.calls[0] as [string, string, RequestInit];
-    expect(call[0]).toBe("/api/orders");
-    expect(call[1]).toBe("token");
+    expect(
+      await screen.findByText(`Seguimiento ${TOKEN} · PED-7 · recién creado`),
+    ).toBeTruthy();
+    expect(mockedApiRequest).toHaveBeenCalledTimes(1);
+    const call = mockedApiRequest.mock.calls[0] as [string, string | null, RequestInit];
+    expect(call[0]).toBe("/api/guest-orders");
+    expect(call[1]).toBeNull();
+    expect(call[2].method).toBe("POST");
     expect(JSON.parse(String(call[2].body))).toEqual({
+      email: "Lucia@duocuc.cl",
       items: [{ productId: "p1", quantity: 2 }],
       notes: "Entregar en la tarde",
     });
-    expect(JSON.parse(sessionStorage.getItem(CART_STORAGE_KEY) ?? "null")).toEqual([]);
+    expect(storedCart()).toEqual([]);
   });
 
-  it("explica que la cuenta no tiene rol y conserva el carrito", async () => {
+  it("también confirma como invitado cuando hay una sesión abierta", async () => {
+    session({ isAuthenticated: true, oid: "oid-1", isClient: true });
+    mockedApiRequest.mockResolvedValue(created);
+
+    renderCheckout();
+    await userEvent.type(emailField(), "lucia@duocuc.cl");
+    await userEvent.click(confirmButton());
+
+    expect(await screen.findByText(/Seguimiento/)).toBeTruthy();
+    expect(mockedApiRequest.mock.calls[0][1]).toBeNull();
+  });
+
+  it("pide el correo antes de enviar", async () => {
+    renderCheckout();
+    await userEvent.click(confirmButton());
+
+    expect(
+      screen.getByText("Ingresa tu correo para recibir el comprobante."),
+    ).toBeTruthy();
+    expect(emailField()).toHaveAttribute("aria-invalid", "true");
+    expect(mockedApiRequest).not.toHaveBeenCalled();
+    expect(storedCart()).toHaveLength(1);
+  });
+
+  it("rechaza un correo sin formato válido", async () => {
+    renderCheckout();
+    await userEvent.type(emailField(), "lucia@duocuc");
+    await userEvent.click(confirmButton());
+
+    expect(
+      screen.getByText("Ingresa un correo válido, por ejemplo nombre@dominio.cl."),
+    ).toBeTruthy();
+    expect(mockedApiRequest).not.toHaveBeenCalled();
+  });
+
+  it("rechaza un correo de más de 254 caracteres", async () => {
+    renderCheckout();
+    fireEvent.change(emailField(), {
+      target: { value: `${"a".repeat(247)}@duoc.cl` },
+    });
+    expect((emailField() as HTMLInputElement).value).toHaveLength(255);
+    await userEvent.click(confirmButton());
+
+    expect(
+      screen.getByText("El correo no puede superar 254 caracteres."),
+    ).toBeTruthy();
+    expect(mockedApiRequest).not.toHaveBeenCalled();
+  });
+
+  it("muestra junto a cada campo los errores de validación del servidor", async () => {
     mockedApiRequest.mockRejectedValue(
-      new ApiError("No autorizado para crear pedidos.", 403),
+      new ApiError("La solicitud tiene errores de validación.", 400, [
+        { field: "email", message: "debe ser una dirección de correo válida" },
+        { field: "notes", message: "no puede superar 1000 caracteres" },
+      ]),
     );
 
     renderCheckout();
-    await userEvent.click(screen.getByRole("button", { name: "Confirmar pedido" }));
+    await userEvent.type(emailField(), "lucia@duocuc.cl");
+    await userEvent.click(confirmButton());
 
     expect(
-      await screen.findByText(/no tiene un rol habilitado para registrar pedidos/i),
+      await screen.findByText("debe ser una dirección de correo válida"),
     ).toBeTruthy();
-    expect(JSON.parse(sessionStorage.getItem(CART_STORAGE_KEY) ?? "[]")).toHaveLength(1);
+    expect(screen.getByText("no puede superar 1000 caracteres")).toBeTruthy();
+    expect(emailField()).toHaveAttribute("aria-invalid", "true");
+    expect(notesField()).toHaveAttribute("aria-invalid", "true");
+    expect(storedCart()).toHaveLength(1);
   });
 
   it("muestra el mensaje del servidor si falta stock", async () => {
@@ -142,11 +217,29 @@ describe("CheckoutPage", () => {
     );
 
     renderCheckout();
-    await userEvent.click(screen.getByRole("button", { name: "Confirmar pedido" }));
+    await userEvent.type(emailField(), "lucia@duocuc.cl");
+    await userEvent.click(confirmButton());
 
     expect(
       await screen.findByText("Stock insuficiente para Mouse inalámbrico."),
     ).toBeTruthy();
+  });
+
+  it("pide reintentar ante una falla del servidor y conserva el carrito", async () => {
+    mockedApiRequest.mockRejectedValue(new ApiError("Bad Gateway", 502));
+
+    renderCheckout();
+    await userEvent.type(emailField(), "lucia@duocuc.cl");
+    await userEvent.click(confirmButton());
+
+    expect(
+      await screen.findByText(
+        "No pudimos registrar tu pedido. Revisa tu conexión e intenta de nuevo.",
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText(/rol Cliente/)).toBeNull();
+    expect(confirmButton()).toBeEnabled();
+    expect(storedCart()).toHaveLength(1);
   });
 
   it("no deja confirmar con el carrito vacío", () => {

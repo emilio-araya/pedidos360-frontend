@@ -370,6 +370,12 @@ export function OrdersPage() {
                           {new Date(order.createdAt).toLocaleString("es-CO")} ·{" "}
                           {order.items.length} ítem(s)
                         </span>
+                        {canManageOrders && order.customerEmail && (
+                          <span className="muted order-customer">
+                            {" · "}
+                            <span>{order.customerEmail}</span>
+                          </span>
+                        )}
                       </div>
                       <div className="order-item__summary">
                         <span

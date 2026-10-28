@@ -88,6 +88,40 @@ describe("cliente HTTP", () => {
     );
   });
 
+  it("expone los errores por campo de un ProblemDetail 400", async () => {
+    vi.stubGlobal("fetch", fetchMock);
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          title: "Bad Request",
+          detail: "La solicitud tiene errores de validación.",
+          errors: [
+            { field: "email", message: "debe ser un correo válido" },
+            { field: 7, message: "ignorado" },
+          ],
+        }),
+        { status: 400 },
+      ),
+    );
+
+    await expect(apiRequest("/api/guest-orders", null)).rejects.toMatchObject({
+      status: 400,
+      message: "La solicitud tiene errores de validación.",
+      fieldErrors: [{ field: "email", message: "debe ser un correo válido" }],
+    });
+  });
+
+  it("deja la lista de errores por campo vacía cuando no viene", async () => {
+    vi.stubGlobal("fetch", fetchMock);
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ detail: "Conflicto" }), { status: 409 }),
+    );
+
+    await expect(apiRequest("/api/orders", "token-test")).rejects.toMatchObject({
+      fieldErrors: [],
+    });
+  });
+
   it("usa el cuerpo tal cual cuando no es JSON", async () => {
     vi.stubGlobal("fetch", fetchMock);
     fetchMock.mockResolvedValue(new Response("Bad Gateway", { status: 502 }));

@@ -66,6 +66,7 @@ export function StoreLayout({ children }: { children: ReactNode }) {
       <footer className="store-footer">
         <div className="store-footer__inner">
           <Brand to="/" tagline="Catálogo público" />
+          <Link to="/seguimiento">Recuperar el enlace de un pedido</Link>
           <span>
             Fotografías:{" "}
             <a

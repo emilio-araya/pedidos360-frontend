@@ -78,10 +78,28 @@
   outline-offset: 1px;
 }
 
+.store-checkout__notes-input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+.store-checkout__notes-input[aria-invalid="true"]:focus-visible {
+  outline-color: var(--danger-soft);
+}
+
 .store-checkout__note {
   margin: 0;
   color: var(--muted);
   font-size: 0.8rem;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+.store-checkout__counter {
+  font-variant-numeric: tabular-nums;
+}
+.store-checkout__field-error {
+  margin: 0;
+  color: var(--danger-dark);
+  font-size: 0.8rem;
+  font-weight: 700;
   line-height: 1.5;
 }
 .store-checkout__error {
@@ -93,15 +111,6 @@
   color: var(--danger-dark);
   font-size: 0.85rem;
   line-height: 1.5;
-}
-
-.store-summary__signin-title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 400;
-  line-height: 1.1;
-  letter-spacing: -0.01em;
 }
 
 .store-checkout__empty {

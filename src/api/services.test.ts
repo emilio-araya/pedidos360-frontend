@@ -3,6 +3,7 @@ import {
   createCatalogService,
   createOrdersService,
   getProduct,
+  normalizeOrder,
 } from "./services";
 
 const fetchMock = vi.fn();
@@ -131,6 +132,27 @@ describe("servicios de API", () => {
     expect(order.stockReserved).toBe(false);
     expect(order.createdAt).toBe("");
     expect(order.updatedAt).toBe("");
+    expect(order.cancellationReason).toBeNull();
+    expect(order.customerEmail).toBeNull();
+  });
+
+  it("conserva el motivo de cancelación y el correo del invitado", () => {
+    const order = normalizeOrder({
+      id: "1",
+      orderNumber: "PED-1",
+      customerId: "guest",
+      status: "CANCELADO",
+      items: [],
+      total: 0,
+      stockReserved: false,
+      createdAt: "2026-10-28",
+      updatedAt: "2026-10-28",
+      cancellationReason: "Sin stock",
+      customerEmail: "lucia@duocuc.cl",
+    });
+
+    expect(order.cancellationReason).toBe("Sin stock");
+    expect(order.customerEmail).toBe("lucia@duocuc.cl");
   });
 
   it("normaliza productos con valores nulos o faltantes", async () => {

@@ -1,13 +1,33 @@
 import { environment } from "../config/environment";
 
+/** Un error de validación de un campo, tal como lo lista un ProblemDetail. */
+export interface FieldError {
+  field: string;
+  message: string;
+}
+
 export class ApiError extends Error {
   constructor(
     message: string,
     readonly status = 0,
+    /** Errores por campo de un `400`; vacío en cualquier otro caso. */
+    readonly fieldErrors: FieldError[] = [],
   ) {
     super(message);
     this.name = "ApiError";
   }
+}
+
+export function fieldErrors(payload: unknown): FieldError[] {
+  if (!payload || typeof payload !== "object") return [];
+  const errors = (payload as Record<string, unknown>).errors;
+  if (!Array.isArray(errors)) return [];
+  return errors.filter(
+    (error): error is FieldError =>
+      Boolean(error) &&
+      typeof (error as FieldError).field === "string" &&
+      typeof (error as FieldError).message === "string",
+  ).map(({ field, message }) => ({ field, message }));
 }
 
 export function apiUrl(path: string): string {
@@ -60,6 +80,10 @@ export async function apiRequest<T>(
 
   const payload = parsePayload(await response.text());
   if (!response.ok)
-    throw new ApiError(errorMessage(payload, response.status), response.status);
+    throw new ApiError(
+      errorMessage(payload, response.status),
+      response.status,
+      fieldErrors(payload),
+    );
   return payload as T;
 }

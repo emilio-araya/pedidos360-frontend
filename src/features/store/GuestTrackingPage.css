@@ -1,0 +1,179 @@
+/* Seguimiento del invitado. Reutiliza el comprobante de la confirmación
+   (CheckoutPage.css) y agrega el aviso del enlace, los datos y el diálogo. */
+
+.store-tracking .store-checkout__empty-title {
+  margin: 0;
+  font-weight: 400;
+  text-wrap: balance;
+}
+.store-tracking .store-checkout__empty p {
+  text-wrap: pretty;
+}
+.store-confirm__head h1 {
+  text-wrap: balance;
+}
+
+/* Aviso de "guarda este enlace": se muestra una sola vez, al llegar. */
+.store-tracking__save {
+  display: grid;
+  gap: 0.6rem;
+  max-width: 44rem;
+  margin-bottom: 1.8rem;
+  padding: 1.2rem 1.3rem;
+  border: 1px solid var(--brand-line);
+  border-radius: 1rem;
+  background: var(--brand-soft);
+}
+.store-tracking__save h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.store-tracking__save p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+.store-tracking__save .store-checkout__note {
+  min-height: 1.2em;
+  color: var(--brand-dark);
+  font-weight: 700;
+}
+.store-tracking__link {
+  display: flex;
+  gap: 0.6rem;
+}
+.store-tracking__link input {
+  flex: 1;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+}
+.store-tracking__link .button {
+  flex: none;
+  min-height: 2.75rem;
+}
+
+.store-tracking__reason {
+  display: grid;
+  gap: 0.2rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--danger-line);
+  border-radius: 0.7rem;
+  background: var(--danger-soft);
+  color: var(--danger-dark);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.store-tracking__reason span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.store-tracking__facts {
+  display: grid;
+  gap: 0.45rem;
+  width: 100%;
+  margin: 0;
+  padding-top: 0.8rem;
+  border-top: 1px dashed var(--border);
+  font-size: 0.85rem;
+}
+.store-tracking__facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.store-tracking__facts dt {
+  color: var(--muted);
+}
+.store-tracking__facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Confirmación de cancelación: diálogo modal nativo. */
+.store-tracking__dialog {
+  width: min(26rem, calc(100% - 2rem));
+  padding: 1.5rem;
+  border: 0;
+  border-radius: 1rem;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow:
+    0 0 0 1px rgba(var(--shadow-rgb), 0.08),
+    0 18px 40px rgba(var(--shadow-rgb), 0.22);
+}
+.store-tracking__dialog::backdrop {
+  background: rgba(var(--shadow-rgb), 0.35);
+}
+.store-tracking__dialog h2 {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.store-tracking__dialog p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+.store-tracking__dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1.3rem;
+}
+
+/* Formulario de reenvío del enlace. */
+.store-link-request {
+  display: grid;
+  gap: 0.6rem;
+  max-width: 32rem;
+  padding: 1.4rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+.store-link-request .button {
+  justify-self: start;
+  margin-top: 0.4rem;
+}
+.store-link-request__intro {
+  max-width: 40rem;
+  margin: 0 0 1.4rem;
+  color: var(--muted);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+.store-link-request__done {
+  margin: 0;
+  padding: 0.8rem 0.95rem;
+  border: 1px solid var(--info-line);
+  border-radius: 0.7rem;
+  background: var(--info-soft);
+  color: var(--info);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .store-tracking__link {
+    flex-direction: column;
+  }
+}

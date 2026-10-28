@@ -75,6 +75,15 @@ La CI ejecuta `npm run test:coverage` en cada push y pull request, muestra el re
 - `/orders`: consulta, creación y seguimiento de pedidos.
 - `/catalog`: productos y stock; requiere rol `Admin` u `Operador`.
 
+Tienda pública (sin sesión):
+
+- `/`, `/producto/:id`, `/carrito`: catálogo y carrito.
+- `/checkout`: compra como invitado. Pide un correo (obligatorio, máximo 254 caracteres) y notas opcionales, y llama a `POST /api/guest-orders` sin `Authorization`. Al confirmar abre el seguimiento del pedido.
+- `/seguimiento/:token`: seguimiento con el enlace secreto (64 caracteres hexadecimales en minúscula). Muestra estado, ítems, total, motivo de cancelación, fechas y el correo enmascarado, y deja cancelar sólo en estado `Creado`. Justo después de comprar avisa que se guarde el enlace y ofrece copiarlo; el mismo enlace llega por correo. Un token mal formado se rechaza sin llamar a la API; un `404` se muestra como enlace inválido o reemplazado.
+- `/seguimiento`: pide un enlace nuevo con correo y número de pedido. La respuesta es siempre la misma, exista o no el pedido; el enlace anterior deja de funcionar.
+
+Las llamadas de invitado viven en `src/api/guestOrders.ts` y siempre usan `apiRequest(..., null)`. `/pedido/:id` sigue siendo la confirmación por id para pedidos con sesión y no acepta tokens. El personal ve el correo del cliente invitado (`customerEmail`) en `/orders`.
+
 Las rutas privadas usan `RequireAuth`. El catálogo usa `RequireCatalogRole`, que espera a que MSAL finalice la inicialización y la adquisición silenciosa antes de evaluar los claims. Ocultar controles en la interfaz no sustituye la autorización del BFF y los microservicios.
 
 ## Docker

@@ -26,6 +26,8 @@ export function normalizeOrder(order: Order): Order {
     stockReserved: Boolean(order.stockReserved),
     createdAt: order.createdAt ?? "",
     updatedAt: order.updatedAt ?? order.createdAt ?? "",
+    cancellationReason: order.cancellationReason ?? null,
+    customerEmail: order.customerEmail ?? null,
   };
 }
 

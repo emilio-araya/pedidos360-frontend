@@ -14,6 +14,8 @@ import { CartPage } from "./features/store/CartPage";
 import { CheckoutPage } from "./features/store/CheckoutPage";
 import { OrderConfirmationPage } from "./features/store/OrderConfirmationPage";
 import { CartProvider } from "./features/store/cart";
+import { GuestLinkRequestPage } from "./features/store/GuestLinkRequestPage";
+import { GuestTrackingPage } from "./features/store/GuestTrackingPage";
 import { ProductPage } from "./features/store/ProductPage";
 import { StorePage } from "./features/store/StorePage";
 
@@ -48,6 +50,8 @@ function AppRoutes() {
       <Route path="/carrito" element={<CartPage />} />
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/pedido/:id" element={<OrderConfirmationPage />} />
+      <Route path="/seguimiento" element={<GuestLinkRequestPage />} />
+      <Route path="/seguimiento/:token" element={<GuestTrackingPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

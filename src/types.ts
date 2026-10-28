@@ -52,6 +52,39 @@ export interface Order {
   stockReserved: boolean;
   createdAt: string;
   updatedAt: string;
+  cancellationReason?: string | null;
+  /** Correo del invitado; nulo en pedidos hechos con sesión. Sólo personal. */
+  customerEmail?: string | null;
+}
+
+/**
+ * Pedido visto por el invitado a través de su enlace secreto. No trae `id`
+ * interno, `customerId`, `stockReserved` ni el correo completo.
+ */
+export interface GuestOrder {
+  orderNumber: string;
+  status: OrderStatus;
+  items: OrderItem[];
+  total: number;
+  notes: string;
+  cancellationReason: string | null;
+  /** Por ejemplo `l***@duocuc.cl`. */
+  maskedEmail: string;
+  createdAt: string;
+  updatedAt: string;
+  /** Sólo viene en la respuesta de creación; nulo en el resto. */
+  trackingToken: string | null;
+}
+
+export interface CreateGuestOrderRequest {
+  email: string;
+  items: CreateOrderItem[];
+  notes?: string;
+}
+
+export interface GuestLinkRequest {
+  email: string;
+  orderNumber: string;
 }
 
 export interface CreateOrderItem {

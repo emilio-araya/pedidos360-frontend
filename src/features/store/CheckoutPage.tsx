@@ -1,38 +1,54 @@
-import { useMemo, useState } from "react";
+import { useRef, useState } from "react";
+import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ApiError } from "../../api/client";
-import { createOrdersService } from "../../api/services";
-import { useAuth } from "../../auth/AuthContext";
+import { createGuestOrder } from "../../api/guestOrders";
 import { useCart } from "./cart";
+import { validateEmail } from "./guestEmail";
 import { OrderLedger } from "./OrderLedger";
 import { formatProductCount } from "./productDisplay";
 import { ProductPlate } from "./ProductPlate";
 import { StoreLayout } from "./StoreLayout";
 import "./CheckoutPage.css";
 
+const NOTES_MAX = 1000;
+const RETRY_MESSAGE =
+  "No pudimos registrar tu pedido. Revisa tu conexión e intenta de nuevo.";
+
+interface FieldMessages {
+  email?: string;
+  notes?: string;
+}
+
 /**
- * Resumen previo a confirmar. La sesión se pide acá, no antes: el visitante
- * arma el carrito sin cuenta y sólo se identifica para registrar el pedido.
+ * Resumen previo a confirmar. Se compra como invitado: no se pide sesión,
+ * sólo un correo para enviar el comprobante con el enlace de seguimiento.
  */
 export function CheckoutPage() {
   const { lines, count, total, clear } = useCart();
-  const { isAuthenticated, isLoading, login, getAccessToken, oid, isClient, canManageOrders } =
-    useAuth();
   const navigate = useNavigate();
+  const emailRef = useRef<HTMLInputElement>(null);
+  const [email, setEmail] = useState("");
   const [notes, setNotes] = useState("");
   const [sending, setSending] = useState(false);
+  const [fields, setFields] = useState<FieldMessages>({});
   const [error, setError] = useState<string | null>(null);
 
-  const ordersService = useMemo(
-    () => createOrdersService(getAccessToken, { canManageOrders, isClient, oid }),
-    [canManageOrders, getAccessToken, isClient, oid],
-  );
-
-  async function confirm() {
-    setSending(true);
+  async function confirm(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (sending) return;
+    const emailError = validateEmail(email);
     setError(null);
+    if (emailError) {
+      setFields({ email: emailError });
+      emailRef.current?.focus();
+      return;
+    }
+    setFields({});
+    setSending(true);
     try {
-      const order = await ordersService.create({
+      const order = await createGuestOrder({
+        email: email.trim(),
         items: lines.map((line) => ({
           productId: line.productId,
           quantity: line.quantity,
@@ -40,9 +56,14 @@ export function CheckoutPage() {
         notes: notes.trim() || undefined,
       });
       clear();
-      navigate(`/pedido/${order.id}`, { state: { order } });
+      navigate(`/seguimiento/${order.trackingToken}`, {
+        state: { order, justCreated: true },
+      });
     } catch (cause) {
-      setError(describeFailure(cause));
+      const failure = describeFailure(cause);
+      setFields(failure.fields);
+      setError(failure.message);
+      if (failure.fields.email) emailRef.current?.focus();
       setSending(false);
     }
   }
@@ -66,7 +87,11 @@ export function CheckoutPage() {
             </Link>
           </div>
         ) : (
-          <div className="store-checkout__layout">
+          <form
+            className="store-checkout__layout"
+            noValidate
+            onSubmit={(event) => void confirm(event)}
+          >
             <section className="store-checkout__items" aria-label="Productos del pedido">
               <ul className="store-checkout__lines">
                 {lines.map((line) => (
@@ -85,26 +110,59 @@ export function CheckoutPage() {
                 ))}
               </ul>
 
-              {isAuthenticated ? (
-                <>
-                  <label className="store-checkout__notes" htmlFor="order-notes">
-                    Notas para el pedido (opcional)
-                  </label>
-                  <textarea
-                    id="order-notes"
-                    className="store-checkout__notes-input"
-                    maxLength={1000}
-                    rows={3}
-                    value={notes}
-                    onChange={(event) => setNotes(event.target.value)}
-                    placeholder="Horario de entrega, referencias, indicaciones…"
-                  />
-                  <span className="store-checkout__note">{notes.length} de 1000</span>
-                </>
+              <label className="store-checkout__notes" htmlFor="order-email">
+                Correo electrónico
+              </label>
+              <input
+                ref={emailRef}
+                id="order-email"
+                className="store-checkout__notes-input"
+                type="email"
+                name="email"
+                autoComplete="email"
+                inputMode="email"
+                spellCheck={false}
+                maxLength={254}
+                required
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="nombre@dominio.cl"
+                aria-invalid={fields.email ? true : undefined}
+                aria-describedby={fields.email ? "order-email-error" : "order-email-hint"}
+              />
+              {fields.email ? (
+                <span id="order-email-error" className="store-checkout__field-error">
+                  {fields.email}
+                </span>
               ) : (
-                <p className="store-checkout__note">
-                  Podrás dejar notas para el pedido cuando inicies sesión.
-                </p>
+                <span id="order-email-hint" className="store-checkout__note">
+                  Sólo lo usamos para enviarte el comprobante y el enlace para
+                  seguir o cancelar tu pedido.
+                </span>
+              )}
+
+              <label className="store-checkout__notes" htmlFor="order-notes">
+                Notas para el pedido (opcional)
+              </label>
+              <textarea
+                id="order-notes"
+                className="store-checkout__notes-input"
+                maxLength={NOTES_MAX}
+                rows={3}
+                value={notes}
+                onChange={(event) => setNotes(event.target.value)}
+                placeholder="Horario de entrega, referencias, indicaciones…"
+                aria-invalid={fields.notes ? true : undefined}
+                aria-describedby={fields.notes ? "order-notes-error" : undefined}
+              />
+              {fields.notes ? (
+                <span id="order-notes-error" className="store-checkout__field-error">
+                  {fields.notes}
+                </span>
+              ) : (
+                <span className="store-checkout__note store-checkout__counter">
+                  {notes.length} de {NOTES_MAX}
+                </span>
               )}
             </section>
 
@@ -119,36 +177,13 @@ export function CheckoutPage() {
                 total={total}
               />
 
-              {isLoading ? (
-                <p className="store-checkout__note">Validando sesión…</p>
-              ) : isAuthenticated ? (
-                <button
-                  type="button"
-                  className="button store-summary__cta"
-                  disabled={sending}
-                  onClick={() => void confirm()}
-                >
-                  {sending ? "Registrando pedido…" : "Confirmar pedido"}
-                </button>
-              ) : (
-                <>
-                  <h3 className="store-summary__signin-title">
-                    Inicia sesión para confirmar
-                  </h3>
-                  <p className="store-summary__note">
-                    Tu carrito queda guardado en esta pestaña y vuelves justo
-                    acá. Necesitas una cuenta de la organización con el rol
-                    Cliente.
-                  </p>
-                  <button
-                    type="button"
-                    className="button store-summary__cta"
-                    onClick={() => void login("/checkout")}
-                  >
-                    Iniciar sesión para confirmar
-                  </button>
-                </>
-              )}
+              <button
+                type="submit"
+                className="button store-summary__cta"
+                disabled={sending}
+              >
+                {sending ? "Registrando pedido…" : "Confirmar pedido"}
+              </button>
 
               {error ? (
                 <p className="store-checkout__error" role="alert">
@@ -160,21 +195,39 @@ export function CheckoutPage() {
                 aceptación. <Link to="/carrito">Volver al carrito</Link>
               </p>
             </aside>
-          </div>
+          </form>
         )}
       </main>
     </StoreLayout>
   );
 }
 
-function describeFailure(cause: unknown): string {
-  if (cause instanceof ApiError) {
-    if (cause.status === 403) {
-      return "Tu cuenta no tiene un rol habilitado para registrar pedidos. Pide a un administrador que te asigne el rol Cliente.";
+interface Failure {
+  message: string | null;
+  fields: FieldMessages;
+}
+
+/**
+ * Un `400` se reparte por campo; un `409` explica el problema del pedido
+ * (por ejemplo, falta de stock). El resto se trata como falla transitoria.
+ */
+function describeFailure(cause: unknown): Failure {
+  if (!(cause instanceof ApiError)) return { message: RETRY_MESSAGE, fields: {} };
+  if (cause.status === 400) {
+    const fields: FieldMessages = {};
+    const others: string[] = [];
+    for (const { field, message } of cause.fieldErrors) {
+      if (field === "email" || field === "notes") fields[field] ??= message;
+      else others.push(message);
     }
-    return cause.message;
+    const hasFields = Object.keys(fields).length > 0;
+    return {
+      message: others.length > 0 ? others.join(" ") : hasFields ? null : cause.message,
+      fields,
+    };
   }
-  return "No fue posible registrar el pedido. Intenta de nuevo.";
+  if (cause.status === 409) return { message: cause.message, fields: {} };
+  return { message: RETRY_MESSAGE, fields: {} };
 }
 
 /** Importes del resumen; el total lo dibuja `OrderLedger`. */

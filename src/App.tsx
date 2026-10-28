@@ -10,8 +10,22 @@ import { LoginPage } from "./pages/LoginPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { OrdersPage } from "./pages/OrdersPage";
 import { CatalogPage } from "./pages/CatalogPage";
+import { CartPage } from "./features/store/CartPage";
+import { CheckoutPage } from "./features/store/CheckoutPage";
+import { OrderConfirmationPage } from "./features/store/OrderConfirmationPage";
+import { CartProvider } from "./features/store/cart";
+import { ProductPage } from "./features/store/ProductPage";
+import { StorePage } from "./features/store/StorePage";
 
 export function App() {
+  return (
+    <CartProvider>
+      <AppRoutes />
+    </CartProvider>
+  );
+}
+
+function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
@@ -29,8 +43,12 @@ export function App() {
           </Route>
         </Route>
       </Route>
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/" element={<StorePage />} />
+      <Route path="/producto/:id" element={<ProductPage />} />
+      <Route path="/carrito" element={<CartPage />} />
+      <Route path="/checkout" element={<CheckoutPage />} />
+      <Route path="/pedido/:id" element={<OrderConfirmationPage />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

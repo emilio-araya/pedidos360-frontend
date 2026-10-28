@@ -3,7 +3,9 @@ import { useAuth } from "../auth/AuthContext";
 import { createCatalogService } from "../api/services";
 import { ErrorState, LoadingState } from "../components/States";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
-import type { Product, ProductInput } from "../types";
+import type { Product } from "../types";
+import { emptyProductForm, toProductPayload } from "./productForm";
+import type { ProductForm } from "./productForm";
 
 const PAGE_SIZE = 20;
 
@@ -12,24 +14,6 @@ const currency = new Intl.NumberFormat("es-CO", {
   currency: "COP",
   maximumFractionDigits: 0,
 });
-
-interface ProductForm {
-  sku: string;
-  name: string;
-  description: string;
-  price: string;
-  stock: string;
-  active: boolean;
-}
-
-const emptyProduct: ProductForm = {
-  sku: "",
-  name: "",
-  description: "",
-  price: "0",
-  stock: "0",
-  active: true,
-};
 
 export function CatalogPage() {
   useDocumentTitle("Catálogo");
@@ -42,7 +26,7 @@ export function CatalogPage() {
   const [page, setPage] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [form, setForm] = useState<ProductForm>(emptyProduct);
+  const [form, setForm] = useState<ProductForm>(emptyProductForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -82,7 +66,7 @@ export function CatalogPage() {
 
   function startCreate() {
     setEditingId(null);
-    setForm({ ...emptyProduct });
+    setForm({ ...emptyProductForm });
     setError(null);
     setMessage(null);
   }
@@ -96,6 +80,7 @@ export function CatalogPage() {
       price: String(product.price),
       stock: String(product.stock),
       active: product.active,
+      imageUrl: product.imageUrl ?? "",
     });
     setError(null);
     setMessage(null);
@@ -115,31 +100,12 @@ export function CatalogPage() {
 
   async function saveProduct() {
     if (saving) return;
-    const payload: ProductInput = {
-      sku: form.sku.trim(),
-      name: form.name.trim(),
-      description: form.description?.trim() ?? "",
-      price: Number(form.price),
-      stock: Number(form.stock),
-      active: form.active,
-    };
-    const description = payload.description ?? "";
-    if (
-      !form.price.trim() ||
-      !form.stock.trim() ||
-      !payload.sku ||
-      !payload.name ||
-      payload.sku.length > 40 ||
-      payload.name.length > 120 ||
-      description.length > 500 ||
-      !Number.isFinite(payload.price) ||
-      payload.price < 0 ||
-      !Number.isInteger(payload.stock) ||
-      payload.stock < 0
-    ) {
-      setError("Completa SKU, nombre, descripción, precio y stock válidos.");
+    const result = toProductPayload(form);
+    if (!result.ok) {
+      setError(result.error);
       return;
     }
+    const { payload } = result;
 
     setSaving(true);
     setError(null);
@@ -156,7 +122,7 @@ export function CatalogPage() {
         `${saved.name} ${editingId ? "actualizado" : "creado"} correctamente.`,
       );
       setEditingId(null);
-      setForm({ ...emptyProduct });
+      setForm({ ...emptyProductForm });
     } catch (reason) {
       setError(
         reason instanceof Error
@@ -180,7 +146,7 @@ export function CatalogPage() {
       else void load(page);
       if (editingId === product.id) {
         setEditingId(null);
-        setForm({ ...emptyProduct });
+        setForm({ ...emptyProductForm });
       }
       if (stockProduct?.id === product.id) {
         setStockProduct(null);
@@ -301,6 +267,20 @@ export function CatalogPage() {
                     updateForm({ description: event.target.value })
                   }
                   placeholder="Descripción comercial"
+                />
+              </div>
+              <div className="form-field form-field--full">
+                <label htmlFor="product-image">Imagen (URL)</label>
+                <input
+                  id="product-image"
+                  type="text"
+                  inputMode="url"
+                  maxLength={512}
+                  value={form.imageUrl}
+                  onChange={(event) =>
+                    updateForm({ imageUrl: event.target.value })
+                  }
+                  placeholder="https://… o /img/producto.jpg"
                 />
               </div>
               <div className="form-field">

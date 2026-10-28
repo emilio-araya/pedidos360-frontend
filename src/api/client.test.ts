@@ -67,4 +67,40 @@ describe("cliente HTTP", () => {
       new ApiError("No fue posible conectar con la API.", 0),
     );
   });
+
+  it("no sale a la red cuando la sesión se perdió", async () => {
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(apiRequest("/api/orders", "")).rejects.toEqual(
+      new ApiError("No hay una sesión activa.", 401),
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("reporta el detalle estructurado que devuelve el backend", async () => {
+    vi.stubGlobal("fetch", fetchMock);
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ detail: { campo: "precio" } }), {
+        status: 400,
+      }),
+    );
+    await expect(apiRequest("/api/catalog/products", "token-test")).rejects.toEqual(
+      new ApiError('{"campo":"precio"}', 400),
+    );
+  });
+
+  it("usa el cuerpo tal cual cuando no es JSON", async () => {
+    vi.stubGlobal("fetch", fetchMock);
+    fetchMock.mockResolvedValue(new Response("Bad Gateway", { status: 502 }));
+    await expect(apiRequest("/api/orders", "token-test")).rejects.toEqual(
+      new ApiError("Bad Gateway", 502),
+    );
+  });
+
+  it("describe el fallo cuando el cuerpo viene vacío", async () => {
+    vi.stubGlobal("fetch", fetchMock);
+    fetchMock.mockResolvedValue(new Response("", { status: 500 }));
+    await expect(apiRequest("/api/orders", "token-test")).rejects.toEqual(
+      new ApiError("La operación falló (500).", 500),
+    );
+  });
 });

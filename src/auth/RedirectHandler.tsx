@@ -3,6 +3,7 @@ import { InteractionStatus } from "@azure/msal-browser";
 import { useMsal } from "@azure/msal-react";
 import { useNavigate } from "react-router-dom";
 import { environment } from "../config/environment";
+import { consumeLoginReturn } from "./loginReturn";
 
 export function RedirectHandler() {
   const { instance, inProgress } = useMsal();
@@ -24,7 +25,7 @@ export function RedirectHandler() {
       .then((result) => {
         if (result?.account) {
           instance.setActiveAccount(result.account);
-          navigate("/dashboard", { replace: true });
+          navigate(consumeLoginReturn() ?? "/dashboard", { replace: true });
         }
       })
       .catch(() => undefined);

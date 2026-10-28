@@ -1,0 +1,31 @@
+.store-price {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1;
+}
+.store-price--large {
+  font-size: 2rem;
+}
+
+.store-stock {
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.store-stock--in {
+  color: var(--success);
+  background: var(--success-soft);
+}
+.store-stock--low {
+  color: var(--warning);
+  background: var(--warning-soft);
+}
+.store-stock--out {
+  color: var(--danger);
+  background: var(--danger-soft);
+}

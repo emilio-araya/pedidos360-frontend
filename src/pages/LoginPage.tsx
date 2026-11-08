@@ -66,7 +66,6 @@ export function LoginPage() {
           <div className="login-logo">
             <span>P</span> Pedidos<b>360</b>
           </div>
-          <p className="eyebrow">Una vista clara de tu operación</p>
           <h1>
             Pedidos que fluyen.
             <br />
@@ -88,7 +87,6 @@ export function LoginPage() {
           <div className="mobile-brand">
             <span>P</span> Pedidos<b>360</b>
           </div>
-          <p className="eyebrow">Acceso seguro</p>
           <h2>Bienvenido de nuevo</h2>
           <p className="login-card__intro">
             Inicia sesión para continuar administrando tus pedidos.

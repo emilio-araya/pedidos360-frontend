@@ -194,6 +194,11 @@ textarea {
   font: inherit;
   color: inherit;
 }
+input::placeholder,
+textarea::placeholder {
+  color: var(--ink-faint);
+  opacity: 1;
+}
 button {
   cursor: pointer;
 }
@@ -475,14 +480,24 @@ a {
   padding: 2.25rem 0 4.5rem;
 }
 .shell-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
   width: var(--page-width);
   margin: 1rem auto -0.5rem;
   padding: 0.75rem 1rem;
   border: 1px solid var(--danger-line);
-  border-left: 4px solid var(--danger);
   color: var(--danger-dark);
   background: var(--danger-soft);
   font-size: 0.88rem;
+}
+.shell-alert::before {
+  width: 0.55rem;
+  height: 0.55rem;
+  flex: none;
+  margin-top: 0.35rem;
+  background: currentColor;
+  content: "";
 }
 
 .page-heading {
@@ -730,7 +745,6 @@ a {
   gap: 0.7rem;
   padding: 0.85rem 0.9rem;
   border: 1px solid var(--cotton-line);
-  border-left: 3px solid var(--accent);
   border-radius: 0;
   color: var(--ink-soft);
   background: var(--cotton);
@@ -1101,11 +1115,19 @@ a {
   margin-bottom: 1rem;
   padding: 0.85rem 1rem;
   border: 1px solid var(--danger-line);
-  border-left: 4px solid var(--danger);
   border-radius: 0;
   color: var(--danger-dark);
   background: var(--danger-soft);
   font-size: 0.88rem;
+}
+/* El aviso se marca con un cuadrado lleno, no con una barra lateral. */
+.alert::before {
+  width: 0.55rem;
+  height: 0.55rem;
+  flex: none;
+  margin-top: 0.35rem;
+  background: currentColor;
+  content: "";
 }
 /* El reintento vive sobre el aviso, no sobre la barra negra: necesita
    su propio contraste. */
@@ -1124,13 +1146,11 @@ a {
 }
 .alert--info {
   border-color: var(--info-line);
-  border-left-color: var(--info);
   color: var(--info);
   background: var(--info-soft);
 }
 .alert--success {
   border-color: var(--success-line);
-  border-left-color: var(--success);
   color: var(--success);
   background: var(--success-soft);
 }
@@ -1353,7 +1373,6 @@ a {
   margin-bottom: 1rem;
   padding: 0.8rem;
   border: 1px solid var(--cotton-line);
-  border-left: 3px solid var(--nylon);
   background: var(--cotton);
 }
 .selected-product strong,

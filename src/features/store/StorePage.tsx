@@ -34,7 +34,6 @@ export function StorePage() {
       <section className="store-hero">
         <div className="store-hero__inner">
           <div className="store-hero__copy">
-            <p className="eyebrow">Catálogo abierto</p>
             <h1>
               Mira primero.
               <br />

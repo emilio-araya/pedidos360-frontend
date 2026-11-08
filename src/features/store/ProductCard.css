@@ -14,8 +14,8 @@
     box-shadow 160ms var(--store-ease);
 }
 .store-card:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 var(--nylon);
+  transform: translateY(-2px);
+  border-color: var(--ink);
 }
 .store-card:hover .store-plate__img {
   scale: 1.04;

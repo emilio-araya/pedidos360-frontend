@@ -134,7 +134,7 @@ export function LoginPage() {
             <span>Acceso protegido</span>
           </div>
           <div className="security-note">
-            <span>⌁</span>
+            <span className="security-icon" aria-hidden="true" />
             <p>
               Usaremos tu cuenta corporativa. Nunca se almacena tu contraseña en
               esta aplicación.

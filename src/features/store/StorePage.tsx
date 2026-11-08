@@ -6,6 +6,14 @@ import { StoreLayout } from "./StoreLayout";
 import { lastKnownPage, useCatalogPage } from "./useCatalogPage";
 import "./StorePage.css";
 
+/** Hechos del catálogo que la etiqueta declara sin adornos. */
+const TAG_FACTS = [
+  { label: "Catálogo", value: "abierto" },
+  { label: "Cuenta", value: "al registrar" },
+  { label: "Envío", value: "no" },
+  { label: "Reseñas", value: "no" },
+] as const;
+
 /**
  * Vitrina pública: se entra sin iniciar sesión y se recorre el catálogo.
  * La autenticación se pide recién al confirmar un pedido.
@@ -24,10 +32,9 @@ export function StorePage() {
   return (
     <StoreLayout>
       <section className="store-hero">
-        <div
-          className={`store-hero__inner${showShowcase ? "" : " store-hero__inner--solo"}`}
-        >
-          <div>
+        <div className="store-hero__inner">
+          <div className="store-hero__copy">
+            <p className="eyebrow">Catálogo abierto</p>
             <h1>
               Mira primero.
               <br />
@@ -44,13 +51,29 @@ export function StorePage() {
               </a>
             </div>
           </div>
-          {showShowcase ? (
-            <Showcase
-              products={featured}
-              loading={loading}
-              total={lastKnownPage(state)?.totalElements ?? 0}
-            />
-          ) : null}
+
+          <aside className="store-tag" aria-label="Etiqueta del catálogo">
+            <div className="store-tag__bar">
+              <span>P360</span>
+              <span>Etiqueta 01</span>
+            </div>
+            {showShowcase ? (
+              <Showcase
+                products={featured}
+                loading={loading}
+                total={lastKnownPage(state)?.totalElements ?? 0}
+              />
+            ) : null}
+            <dl className="store-tag__facts">
+              {TAG_FACTS.map((fact) => (
+                <div key={fact.label}>
+                  <dt>{fact.label}</dt>
+                  <dd>{fact.value}</dd>
+                </div>
+              ))}
+            </dl>
+            <div className="store-tag__code" aria-hidden="true" />
+          </aside>
         </div>
       </section>
 

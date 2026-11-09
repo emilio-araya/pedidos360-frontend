@@ -1,3 +1,5 @@
+/* Contador de cantidad: tres casillas unidas, sin radios. */
+
 .store-stepper {
   display: flex;
   flex-wrap: wrap;
@@ -6,44 +8,52 @@
 }
 .store-stepper__label {
   width: 100%;
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 700;
+  color: var(--ink-soft);
+  font-family: var(--font-label);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 .store-stepper__control {
   display: inline-flex;
   align-items: stretch;
   overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 0.7rem;
-  background: var(--surface);
+  border: 1px solid var(--nylon);
+  border-radius: 0;
+  background: var(--tag);
 }
 .store-stepper__control button {
   display: grid;
-  place-items: center;
   width: 2.5rem;
   border: 0;
-  background: transparent;
+  place-items: center;
   color: var(--ink);
-  cursor: pointer;
-  transition: background 140ms ease;
+  background: transparent;
+  font-size: 1.1rem;
+  line-height: 1;
+  transition:
+    background 140ms ease,
+    color 140ms ease;
 }
 .store-stepper__control button:hover:not(:disabled) {
-  background: var(--brand-soft);
+  color: var(--nylon);
+  background: var(--accent);
 }
 .store-stepper__control button:disabled {
-  color: var(--muted);
+  color: var(--ink-faint);
   cursor: not-allowed;
-  opacity: 0.45;
 }
 .store-stepper__control input {
-  width: 3.2rem;
+  width: 3.1rem;
   height: 2.5rem;
   border: 0;
-  border-inline: 1px solid var(--border);
+  border-inline: 1px solid var(--cotton-line);
+  border-radius: 0;
   background: transparent;
   color: var(--ink);
-  font: inherit;
+  font-family: var(--font-display);
+  font-size: 1rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   text-align: center;
@@ -64,7 +74,7 @@
   white-space: nowrap;
 }
 .store-stepper__hint {
-  color: var(--muted);
+  color: var(--ink-soft);
   font-size: 0.8rem;
 }
 

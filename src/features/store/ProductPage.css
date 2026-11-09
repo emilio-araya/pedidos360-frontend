@@ -1,3 +1,5 @@
+/* Ficha de producto: placa grande a la izquierda, etiqueta de compra a la derecha. */
+
 .store-product {
   width: var(--store-width);
   margin: 0 auto;
@@ -10,12 +12,18 @@
   align-items: center;
   gap: 0.35rem;
   margin-bottom: 1.4rem;
-  color: var(--muted);
-  font-size: 0.85rem;
+  color: var(--ink-faint);
+  font-family: var(--font-label);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 .store-crumbs a {
-  color: var(--brand-dark);
-  text-underline-offset: 0.2em;
+  color: var(--ink-soft);
+  text-underline-offset: 0.25em;
+}
+.store-crumbs a:hover {
+  color: var(--ink);
 }
 .store-crumbs [aria-current] {
   overflow: hidden;
@@ -32,35 +40,35 @@
   gap: clamp(1.5rem, 3.5vw, 3rem);
 }
 
-/* Recuadro de compra: lo único con borde propio en la página. */
+/* La etiqueta de compra: lo único con borde propio en la página. */
 .store-buybox {
   position: sticky;
-  top: 96px;
+  top: 88px;
   display: grid;
   gap: 1rem;
-  padding: 1.6rem 1.6rem 1.4rem;
-  border: 1px solid var(--border);
-  border-radius: 1rem;
-  background: var(--surface);
+  padding: 1.5rem;
+  border: 1px solid var(--nylon);
+  border-top: 6px solid var(--nylon);
+  border-radius: 0;
+  background: var(--tag);
 }
 .store-buybox h1 {
   margin: 0;
-  color: var(--ink);
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 3vw, 2.6rem);
-  font-weight: 400;
-  line-height: 1.02;
-  letter-spacing: -0.015em;
+  font-size: clamp(1.9rem, 3vw, 2.5rem);
+  line-height: 0.96;
   text-wrap: balance;
 }
 .store-buybox__sku {
-  margin: -0.55rem 0 0;
-  color: var(--muted);
-  font-size: 0.8rem;
+  margin: -0.5rem 0 0;
+  color: var(--ink-faint);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 .store-buybox__desc {
   margin: 0;
-  color: var(--muted);
+  color: var(--ink-soft);
   line-height: 1.55;
 }
 .store-buybox__price {
@@ -69,7 +77,7 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.9rem 0 1rem;
-  border-block: 1px solid var(--border);
+  border-block: 1px solid var(--cotton-line);
 }
 .store-buybox__actions {
   display: grid;
@@ -78,23 +86,23 @@
 .store-buybox__action {
   width: 100%;
   min-height: 3rem;
-  font-size: 0.98rem;
 }
 .store-buybox__status {
   min-height: 1.3em;
   margin: 0;
   color: var(--success);
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   font-weight: 600;
 }
 .store-buybox__status a {
-  color: var(--brand-dark);
+  color: var(--ink);
+  text-underline-offset: 0.25em;
 }
 .store-buybox__note {
   margin: 0;
   padding-top: 0.9rem;
-  border-top: 1px solid var(--border);
-  color: var(--muted);
+  border-top: 1px solid var(--cotton-line);
+  color: var(--ink-soft);
   font-size: 0.8rem;
   line-height: 1.5;
 }
@@ -108,23 +116,20 @@
 }
 .store-product__missing h1 {
   margin: 0;
-  font-family: var(--font-display);
   font-size: clamp(2rem, 4vw, 2.8rem);
-  font-weight: 400;
-  letter-spacing: -0.015em;
 }
 .store-product__missing p {
   margin: 0 0 0.6rem;
-  color: var(--muted);
+  color: var(--ink-soft);
 }
 
 .store-product__ghost-plate {
   aspect-ratio: 4 / 3;
-  border-radius: 1rem;
+  border: 1px solid var(--cotton-line);
 }
 .store-product__ghost-line {
-  height: 1.1rem;
-  border-radius: 0.5rem;
+  height: 1rem;
+  margin-top: 0.8rem;
 }
 .store-product__ghost-line--short {
   width: 55%;
@@ -132,15 +137,18 @@
 
 .store-related {
   margin-top: clamp(3rem, 6vw, 4.5rem);
-  padding-top: 1.6rem;
-  border-top: 1px solid var(--border);
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--nylon);
 }
 .store-related h2 {
   margin: 0 0 1.4rem;
-  font-family: var(--font-display);
-  font-size: clamp(1.7rem, 2.6vw, 2.2rem);
-  font-weight: 400;
-  letter-spacing: -0.01em;
+  font-size: clamp(1.6rem, 2.4vw, 2.1rem);
+}
+.store-related h2::before,
+.store-related h2::after {
+  content: '"';
+  color: var(--ink-faint);
+  font-weight: 500;
 }
 
 @media (max-width: 860px) {

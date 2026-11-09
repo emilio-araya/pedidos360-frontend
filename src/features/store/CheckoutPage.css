@@ -1,7 +1,9 @@
+/* Checkout y confirmación: la misma etiqueta, ahora con número de vale. */
+
 .store-checkout {
   width: var(--store-width);
   margin: 0 auto;
-  padding: 2.2rem 0 4.5rem;
+  padding: 2rem 0 4.5rem;
 }
 
 .store-checkout__layout {
@@ -13,11 +15,16 @@
 
 .store-checkout__items {
   display: grid;
-  gap: 0.9rem;
+  gap: 0.8rem;
   padding: 1.4rem;
-  border: 1px solid var(--border);
-  border-radius: 1rem;
-  background: var(--surface);
+  border: 1px solid var(--nylon);
+  background: var(--tag);
+}
+.store-checkout__items h2 {
+  margin: 0;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid var(--nylon);
+  font-size: 1.3rem;
 }
 
 .store-checkout__lines {
@@ -31,8 +38,8 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 1rem;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--border);
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--cotton-line);
 }
 .store-checkout__line-info {
   display: grid;
@@ -41,53 +48,62 @@
 }
 .store-checkout__line-name {
   overflow: hidden;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   text-overflow: ellipsis;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 .store-checkout__line-unit {
-  color: var(--muted);
-  font-size: 0.85rem;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
   font-variant-numeric: tabular-nums;
 }
 .store-checkout__line-subtotal {
-  font-variant-numeric: tabular-nums;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .store-checkout__notes {
-  margin-top: 0.6rem;
-  color: var(--ink);
-  font-size: 0.88rem;
-  font-weight: 700;
+  margin-top: 0.4rem;
+  color: var(--ink-soft);
+  font-family: var(--font-label);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 .store-checkout__notes-input {
   width: 100%;
   padding: 0.75rem 0.85rem;
-  border: 1px solid var(--border);
-  border-radius: 0.7rem;
-  background: var(--paper-light);
+  border: 1px solid var(--cotton-line);
+  border-radius: 0;
   color: var(--ink);
+  background: var(--tag);
   font: inherit;
   line-height: 1.5;
   resize: vertical;
+  caret-color: var(--accent-deep);
 }
 .store-checkout__notes-input:focus-visible {
-  border-color: var(--brand);
-  outline: 2px solid var(--brand-soft);
+  border-color: var(--nylon);
+  outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
-
 .store-checkout__notes-input[aria-invalid="true"] {
   border-color: var(--danger);
 }
 .store-checkout__notes-input[aria-invalid="true"]:focus-visible {
-  outline-color: var(--danger-soft);
+  outline-color: var(--danger);
 }
 
 .store-checkout__note {
   margin: 0;
-  color: var(--muted);
+  color: var(--ink-soft);
   font-size: 0.8rem;
   line-height: 1.5;
   text-wrap: pretty;
@@ -99,58 +115,69 @@
   margin: 0;
   color: var(--danger-dark);
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.5;
 }
 .store-checkout__error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
   margin: 0;
   padding: 0.7rem 0.85rem;
   border: 1px solid var(--danger-line);
-  border-radius: 0.7rem;
-  background: var(--danger-soft);
   color: var(--danger-dark);
+  background: var(--danger-soft);
   font-size: 0.85rem;
   line-height: 1.5;
+}
+.store-checkout__error::before {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: none;
+  margin-top: 0.4rem;
+  background: currentColor;
+  content: "";
 }
 
 .store-checkout__empty {
   display: grid;
   justify-items: start;
   gap: 0.6rem;
-  max-width: 32rem;
+  max-width: 34rem;
   padding: 2.5rem 0 1rem;
 }
 .store-checkout__empty p {
   margin: 0;
-  color: var(--muted);
+  color: var(--ink-soft);
 }
 .store-checkout__empty .store-checkout__empty-title {
+  margin: 0;
   color: var(--ink);
   font-family: var(--font-display);
-  font-size: 2rem;
-  line-height: 1.1;
+  font-size: clamp(2rem, 3.4vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: 0.005em;
+  line-height: 0.94;
+  text-transform: uppercase;
 }
 .store-checkout__empty .button {
   margin-top: 0.6rem;
 }
 
-/* ---------- Pedido registrado ---------- */
+/* ---------- Pedido registrado: el vale ---------- */
 
 .store-confirm__head {
-  max-width: 44rem;
+  max-width: 46rem;
   margin-bottom: 1.8rem;
 }
 .store-confirm__head h1 {
   margin: 0 0 0.5rem;
-  font-family: var(--font-display);
-  font-size: clamp(2.4rem, 4.4vw, 3.4rem);
-  font-weight: 400;
-  line-height: 0.98;
-  letter-spacing: -0.02em;
+  font-size: clamp(2.3rem, 4.4vw, 3.3rem);
+  line-height: 0.9;
 }
 .store-confirm__head p {
   margin: 0;
-  color: var(--muted);
+  color: var(--ink-soft);
   line-height: 1.6;
 }
 
@@ -161,15 +188,14 @@
   gap: clamp(1.5rem, 3vw, 2.5rem);
 }
 
-/* El comprobante: papel con borde troquelado y cifras tabulares. */
 .store-confirm__ticket {
   display: grid;
   justify-items: start;
   gap: 0.9rem;
-  padding: 1.6rem 1.7rem;
-  border: 1px solid var(--border);
-  border-radius: 1rem;
-  background: var(--surface);
+  padding: 1.5rem 1.6rem;
+  border: 1px solid var(--nylon);
+  border-top: 6px solid var(--nylon);
+  background: var(--tag);
 }
 .store-confirm__ticket-head {
   display: flex;
@@ -178,21 +204,22 @@
   gap: 1rem;
   width: 100%;
   padding-bottom: 0.7rem;
-  border-bottom: 1px dashed var(--border);
+  border-bottom: 1px dashed var(--cotton-line);
 }
 .store-confirm__ticket-head h2 {
   margin: 0;
-  color: var(--muted);
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-family: var(--font-label);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
 }
 .store-confirm__number {
   font-family: var(--font-display);
-  font-size: 1.6rem;
+  font-size: 1.75rem;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.01em;
 }
 .store-confirm__lines {
   display: grid;
@@ -207,11 +234,16 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.45rem 0;
+  border-bottom: 1px dotted var(--cotton-line);
   font-size: 0.92rem;
 }
+.store-confirm__lines li:last-child {
+  border-bottom: 0;
+}
 .store-confirm__lines li span:last-child {
+  font-family: var(--font-display);
   font-variant-numeric: tabular-nums;
-  font-weight: 700;
+  font-weight: 600;
 }
 .store-confirm__ticket .store-ledger {
   width: 100%;
@@ -222,20 +254,16 @@
   justify-items: start;
   gap: 0.8rem;
   padding: 1.4rem 1.5rem;
-  border: 1px solid var(--border);
-  border-radius: 1rem;
-  background: var(--paper-light);
+  border: 1px solid var(--nylon);
+  background: var(--cotton);
 }
 .store-confirm__aside h2 {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: 1.6rem;
-  font-weight: 400;
-  letter-spacing: -0.01em;
+  font-size: 1.5rem;
 }
 .store-confirm__aside p {
   margin: 0;
-  color: var(--muted);
+  color: var(--ink-soft);
   font-size: 0.9rem;
   line-height: 1.55;
 }
@@ -243,9 +271,12 @@
   margin-top: 0.3rem;
 }
 .store-confirm__back {
-  color: var(--brand-dark);
-  font-size: 0.85rem;
-  text-underline-offset: 0.2em;
+  color: var(--ink);
+  font-family: var(--font-label);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-underline-offset: 0.25em;
+  text-transform: uppercase;
 }
 
 @media (max-width: 900px) {

@@ -1,87 +1,81 @@
+/* Tarjeta de producto: una placa rotulada con su precio en precinto naranja. */
+
 .store-card {
   position: relative;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  border-radius: 1rem;
-  background: var(--surface);
-  box-shadow:
-    0 1px 1px rgba(var(--shadow-rgb), 0.06),
-    0 14px 30px -24px rgba(var(--shadow-rgb), 0.45);
-  animation: store-rise 560ms var(--store-ease) both;
-  animation-delay: calc(var(--i, 0) * 55ms);
+  border: 1px solid var(--nylon);
+  border-radius: 0;
+  background: var(--tag);
+  animation: store-rise 420ms var(--store-ease) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
   transition:
-    box-shadow 240ms ease,
-    transform 240ms var(--store-ease);
+    transform 160ms var(--store-ease),
+    box-shadow 160ms var(--store-ease);
 }
 .store-card:hover {
-  box-shadow:
-    0 2px 3px rgba(var(--shadow-rgb), 0.07),
-    0 26px 42px -26px rgba(var(--shadow-rgb), 0.5);
-  transform: translateY(-4px);
+  transform: translateY(-2px);
+  border-color: var(--ink);
 }
 .store-card:hover .store-plate__img {
-  scale: 1.05;
+  scale: 1.04;
 }
 
-/* Toda la tarjeta lleva a la página del producto; el enlace va por encima
-   del contenido para no anidar titulares dentro de un enlace. */
+/* Toda la tarjeta abre la ficha; el enlace va por encima del contenido. */
 .store-card__open {
   position: absolute;
-  inset: 0;
   z-index: 1;
-  border-radius: inherit;
+  inset: 0;
+  border-radius: 0;
 }
 .store-card__open:focus-visible {
-  outline: 2px solid var(--brand);
+  outline: 2px solid var(--nylon);
   outline-offset: 2px;
 }
 
 .store-card__body {
   display: grid;
-  gap: 0.35rem;
-  padding: 1rem 1.05rem 0.4rem;
+  gap: 0.3rem;
+  padding: 0.9rem 1rem 0.35rem;
 }
 .store-card__body h3 {
-  margin: 0;
-  font-size: 1.02rem;
-  letter-spacing: -0.015em;
+  font-size: 1.1rem;
+  letter-spacing: 0.012em;
+  line-height: 1.02;
 }
 .store-card__desc {
   display: -webkit-box;
-  min-height: 2.55em;
+  min-height: 2.5em;
   margin: 0;
   overflow: hidden;
-  color: var(--muted);
-  font-size: 0.87rem;
-  line-height: 1.45;
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+  line-height: 1.42;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
+
 .store-card__foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.6rem;
+  gap: 0.5rem;
   margin-top: auto;
-  padding: 0.85rem 1.05rem 1.1rem;
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid var(--cotton-line);
 }
 
 .store-card--ghost {
-  gap: 0.7rem;
-  padding-bottom: 1.1rem;
+  gap: 0;
+  padding-bottom: 1rem;
   animation: none;
 }
-.store-skeleton {
-  border-radius: 0.5rem;
-}
 .store-skeleton--banner {
-  aspect-ratio: 16 / 9;
-  border-radius: 0;
+  aspect-ratio: 16 / 10;
 }
 .store-skeleton--line {
-  height: 0.72rem;
-  margin: 0 1.05rem;
+  height: 0.7rem;
+  margin: 0.85rem 1rem 0;
 }
 .store-skeleton--short {
   width: 42%;
@@ -90,7 +84,7 @@
 @keyframes store-rise {
   from {
     opacity: 0;
-    translate: 0 0.9rem;
+    translate: 0 0.8rem;
   }
 }
 
@@ -101,6 +95,7 @@
   }
   .store-card:hover {
     transform: none;
+    box-shadow: none;
   }
   .store-card:hover .store-plate__img {
     scale: none;

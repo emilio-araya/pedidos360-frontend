@@ -108,9 +108,7 @@
 
 | Línea | Rama sin cubrir | Prueba necesaria |
 |---|---|---|
-| 23 | `cognitoRequested` true | Navegar con `state: { provider: "cognito" }` |
 | 33-38 | `signIn` con error | Mock de `login` que rechaza |
-| 49-54 | `signInCognito` con error | Mock de `loginCognito` que rechaza |
 | 59 | `isLoading` true | Renderizar con `isLoading: true` |
 
 **Pruebas específicas:**
@@ -118,13 +116,9 @@
 ```typescript
 // signIn: éxito
 // signIn: error (muestra alerta)
-// signInCognito: éxito
-// signInCognito: error (muestra alerta)
-// cognitoRequested: true (no redirige)
-// cognitoRequested: false + autenticado (redirige a /dashboard)
+// usuario autenticado (redirige a /dashboard)
 // isLoading: true (muestra "Validando sesión…")
 // error: muestra alerta con mensaje
-// cognitoConfigured: false (no muestra botón de Cognito)
 ```
 
 ### 6. `src/types.ts` — 25% branch coverage
@@ -165,20 +159,11 @@ Agregar pruebas unitarias para:
 
 **Archivo sugerido:** `src/components/States.test.tsx`
 
-### Prioridad 4: `src/pages/AwsPortalPage.tsx` (impacto medio)
-
-Agregar pruebas de integración para:
-1. Carga exitosa con datos
-2. Manejo de errores
-3. Renderizado con estados vacíos
-
-**Archivo sugerido:** `src/pages/AwsPortalPage.test.tsx`
-
-### Prioridad 5: `src/pages/LoginPage.tsx` (impacto medio)
+### Prioridad 4: `src/pages/LoginPage.tsx` (impacto medio)
 
 Agregar pruebas de integración para:
 1. Flujo de login con éxito y error
-2. Estado `cognitoRequested`
+2. Redirección cuando ya hay sesión
 3. Renderizado condicional
 
 **Archivo sugerido:** `src/pages/LoginPage.test.tsx`

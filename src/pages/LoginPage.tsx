@@ -1,28 +1,19 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
-import { useCognitoAuth } from "../auth/CognitoAuthContext";
-import { cognitoSignupUrl } from "../auth/cognito";
 import { environment } from "../config/environment";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
 export function LoginPage() {
   useDocumentTitle("Iniciar sesión");
   const { isAuthenticated, isLoading, login } = useAuth();
-  const { isConfigured: cognitoConfigured, login: loginCognito } =
-    useCognitoAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const cognitoRequested =
-    (location.state as { provider?: string } | null)?.provider === "cognito";
   const [signingIn, setSigningIn] = useState(false);
-  const [cognitoSigningIn, setCognitoSigningIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isAuthenticated && !cognitoRequested)
-      navigate("/dashboard", { replace: true });
-  }, [cognitoRequested, isAuthenticated, navigate]);
+    if (isAuthenticated) navigate("/dashboard", { replace: true });
+  }, [isAuthenticated, navigate]);
 
   async function signIn() {
     if (signingIn) return;
@@ -40,23 +31,7 @@ export function LoginPage() {
     }
   }
 
-  async function signInCognito() {
-    if (cognitoSigningIn) return;
-    setCognitoSigningIn(true);
-    setError(null);
-    try {
-      await loginCognito();
-    } catch (reason) {
-      setError(
-        reason instanceof Error
-          ? reason.message
-          : "No fue posible iniciar sesión en AWS.",
-      );
-      setCognitoSigningIn(false);
-    }
-  }
-
-  if (isLoading || (isAuthenticated && !cognitoRequested))
+  if (isLoading || isAuthenticated)
     return <div className="loading-screen">Validando sesión…</div>;
 
   return (
@@ -109,25 +84,6 @@ export function LoginPage() {
             </span>
             {signingIn ? "Redirigiendo…" : "Continuar con Microsoft"}
           </button>
-          {cognitoConfigured && (
-            <button
-              className="button button--secondary login-button"
-              type="button"
-              onClick={signInCognito}
-              disabled={cognitoSigningIn}
-            >
-              {cognitoSigningIn ? "Redirigiendo a AWS…" : "Acceder con Amazon Cognito"}
-            </button>
-          )}
-
-          {cognitoSignupUrl && (
-            <p className="signup-note">
-              ¿No tienes cuenta en AWS?{" "}
-              <a href={cognitoSignupUrl} rel="noreferrer">
-                Crear cuenta en el tenant
-              </a>
-            </p>
-          )}
           <div className="login-divider">
             <span>Acceso protegido</span>
           </div>

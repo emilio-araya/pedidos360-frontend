@@ -18,29 +18,6 @@ export function normalizeRole(value: unknown): AppRole | null {
   );
 }
 
-export function normalizeCognitoRole(value: unknown): AppRole | null {
-  return value === "Admin" || value === "Operador" || value === "Cliente"
-    ? value
-    : null;
-}
-
-export function cognitoRolesFromClaims(claims: unknown): AppRole[] {
-  if (!claims || typeof claims !== "object") return [];
-  const rawGroups = (claims as Record<string, unknown>)["cognito:groups"];
-  const values = Array.isArray(rawGroups)
-    ? rawGroups
-    : typeof rawGroups === "string"
-      ? [rawGroups]
-      : [];
-  return [
-    ...new Set(
-      values
-        .map(normalizeCognitoRole)
-        .filter((role): role is AppRole => role !== null),
-    ),
-  ];
-}
-
 export function rolesFromClaims(claims: unknown): AppRole[] {
   if (!claims || typeof claims !== "object") return [];
   const rawRoles = (claims as Record<string, unknown>).roles;

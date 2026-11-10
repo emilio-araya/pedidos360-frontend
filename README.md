@@ -11,7 +11,6 @@ SPA React + Vite + TypeScript para la gestión de pedidos y catálogo de Pedidos
 
 - Node.js 26 y npm.
 - Microsoft Entra ID configurado para la SPA y la API en `/api/**`.
-- Amazon Cognito configurado con Authorization Code + PKCE S256 para `/aws/api/**`.
 - Docker opcional para servir el build mediante Nginx.
 
 ## Desarrollo
@@ -32,17 +31,10 @@ API_SCOPE=... \
 API_BASE_URL=https://api.example.com \
 REDIRECT_URI=https://app.example.com/login \
 POST_LOGOUT_REDIRECT_URI=https://app.example.com/login \
-COGNITO_USER_POOL_ID=us-east-1_example \
-COGNITO_USER_POOL_CLIENT_ID=example-client-id \
-COGNITO_DOMAIN=example.auth.us-east-1.amazoncognito.com \
-COGNITO_ISSUER=https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example \
-COGNITO_REDIRECT_URI=https://app.example.com/auth/cognito/callback \
-COGNITO_LOGOUT_URI=https://app.example.com/login \
-COGNITO_API_SCOPE='openid email profile' \
 npm run generate:environment
 ```
 
-El frontend es una SPA pública: utiliza Authorization Code + PKCE y no distribuye client secrets. MSAL obtiene el token delegado de Entra para `/api/**`; Amplify obtiene de forma independiente el access token de Cognito para `/aws/api/**` y lo guarda en `sessionStorage` (con fallback de memoria), no en `localStorage`. Los callbacks de Cognito (`/auth/cognito/callback`) y Entra (`/login`) están separados para que un proveedor no procese el código del otro.
+El frontend es una SPA pública: utiliza Authorization Code + PKCE y no distribuye client secrets. MSAL obtiene el token delegado de Microsoft Entra ID para `/api/**`; es el único proveedor de identidad de la aplicación.
 
 ## Verificación
 
@@ -52,7 +44,7 @@ npm run test:coverage
 npm run build
 ```
 
-Las pruebas cubren claims, roles, transiciones, cliente HTTP, servicios, paginación de pedidos y de catálogo, login, callback y sesión Cognito. El build de Vite genera `dist/`.
+Las pruebas cubren claims, roles, transiciones, cliente HTTP, servicios, paginación de pedidos y de catálogo, login y callback. El build de Vite genera `dist/`.
 
 El listado de pedidos se pide paginado (`page`/`size`, 20 por página) y muestra controles de navegación con el total. El dashboard recorre las páginas para calcular sus agregados y avisa cuando el volumen supera el tope de la vista, en lugar de mostrar totales parciales como si fueran completos.
 
@@ -68,9 +60,7 @@ La CI ejecuta `npm run test:coverage` en cada push y pull request, muestra el re
 
 ## Rutas y autorización
 
-- `/login`: inicio de sesión con Microsoft o Amazon Cognito.
-- `/auth/cognito/callback`: callback OAuth/PKCE de Cognito.
-- `/aws`: portal protegido por sesión Cognito y limitado a `/aws/api/**`.
+- `/login`: inicio de sesión con Microsoft Entra ID.
 - `/dashboard`: resumen y pedidos recientes.
 - `/orders`: consulta, creación y seguimiento de pedidos.
 - `/catalog`: productos y stock; requiere rol `Admin` u `Operador`.

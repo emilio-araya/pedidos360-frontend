@@ -2,10 +2,6 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "./components/AppShell";
 import { RequireAuth } from "./auth/RequireAuth";
 import { RequireCatalogRole } from "./auth/RequireCatalogRole";
-import { RequireCognitoAuth } from "./auth/RequireCognitoAuth";
-import { AwsPortalPage } from "./pages/AwsPortalPage";
-import { CognitoCallbackPage } from "./pages/CognitoCallbackPage";
-import { PostLogoutPage } from "./pages/PostLogoutPage";
 import { LoginPage } from "./pages/LoginPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { OrdersPage } from "./pages/OrdersPage";
@@ -31,11 +27,6 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/logout/continuar" element={<PostLogoutPage />} />
-      <Route path="/auth/cognito/callback" element={<CognitoCallbackPage />} />
-      <Route element={<RequireCognitoAuth />}>
-        <Route path="/aws" element={<AwsPortalPage />} />
-      </Route>
       <Route element={<RequireAuth />}>
         <Route element={<AppShell />}>
           <Route path="/dashboard" element={<DashboardPage />} />

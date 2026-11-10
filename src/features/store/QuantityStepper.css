@@ -1,4 +1,4 @@
-/* Contador de cantidad: tres casillas unidas, sin radios. */
+/* Contador de cantidad: moderno, suave y redondeado */
 
 .store-stepper {
   display: flex;
@@ -9,19 +9,20 @@
 .store-stepper__label {
   width: 100%;
   color: var(--ink-soft);
-  font-family: var(--font-label);
-  font-size: 0.66rem;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 .store-stepper__control {
   display: inline-flex;
   align-items: stretch;
   overflow: hidden;
-  border: 1px solid var(--nylon);
-  border-radius: 0;
+  border: 1px solid var(--cotton-line);
+  border-radius: var(--radius-md);
   background: var(--tag);
+  box-shadow: var(--shadow-xs);
 }
 .store-stepper__control button {
   display: grid;
@@ -37,8 +38,8 @@
     color 140ms ease;
 }
 .store-stepper__control button:hover:not(:disabled) {
-  color: var(--nylon);
-  background: var(--accent);
+  color: var(--ink);
+  background: var(--cotton-deep);
 }
 .store-stepper__control button:disabled {
   color: var(--ink-faint);
@@ -52,8 +53,8 @@
   border-radius: 0;
   background: transparent;
   color: var(--ink);
-  font-family: var(--font-display);
-  font-size: 1rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   text-align: center;

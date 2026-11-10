@@ -1,60 +1,63 @@
-/* Precio y existencias. El precio es un precinto; el stock, una etiqueta. */
+/* Precio y existencias: moderno, legible y con badges de estado redondeados */
 
 .store-price {
   color: var(--ink);
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: 1.45rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.02em;
   line-height: 1;
 }
 .store-price--large {
-  font-size: 2.1rem;
+  font-size: 2.2rem;
+  letter-spacing: -0.03em;
 }
 
-/* En la tarjeta el precio cuelga como precinto naranja. */
+/* En la tarjeta el precio se presenta limpio y destacado */
 .store-card .store-price {
-  padding: 0.3rem 0.5rem;
-  border: 1px solid var(--nylon);
-  color: var(--nylon);
-  background: var(--accent);
-  font-size: 1.18rem;
+  padding: 0;
+  border: none;
+  color: var(--ink);
+  background: transparent;
+  font-size: 1.25rem;
+  font-weight: 700;
 }
 
 .store-stock {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.28rem 0.5rem;
+  padding: 0.25rem 0.65rem;
   border: 1px solid currentColor;
-  border-radius: 0;
-  font-family: var(--font-label);
-  font-size: 0.62rem;
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.02em;
   line-height: 1;
-  text-transform: uppercase;
   white-space: nowrap;
 }
 .store-stock::before {
-  width: 0.35rem;
-  height: 0.35rem;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
   flex: none;
   background: currentColor;
   content: "";
 }
 .store-stock--in {
-  color: var(--success);
-  background: var(--success-soft);
+  color: #065f46;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
 }
 .store-stock--low {
-  color: var(--nylon);
-  border-color: var(--nylon);
-  background: var(--accent);
+  color: #9a3412;
+  background: #ffedd5;
+  border-color: #fed7aa;
 }
 .store-stock--out {
-  color: #fff;
-  border-color: var(--nylon);
-  background: var(--nylon);
+  color: #991b1b;
+  background: #fef2f2;
+  border-color: #fecaca;
 }

@@ -71,7 +71,6 @@ export function StorePage() {
                 </div>
               ))}
             </dl>
-            <div className="store-tag__code" aria-hidden="true" />
           </aside>
         </div>
       </section>

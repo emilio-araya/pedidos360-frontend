@@ -1,7 +1,7 @@
 /* ============================================================
-   Pedidos360 — Etiqueta industrial
-   Algodón blanco, nailon negro y naranja de seguridad.
-   Esquinas rectas, reglas de 1px, franjas de peligro a 45°.
+   Pedidos360 — Superficies claras
+   Slate profundo sobre gris de tienda, un solo acento naranja,
+   esquinas de 12-16px y elevación declarada una sola vez.
    ============================================================ */
 
 @font-face {
@@ -25,33 +25,14 @@
   font-style: normal;
   font-display: swap;
 }
-@font-face {
-  font-family: "Barlow Condensed";
-  src: url("/fonts/barlow-condensed-500.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Barlow Condensed";
-  src: url("/fonts/barlow-condensed-600.woff2") format("woff2");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Barlow Condensed";
-  src: url("/fonts/barlow-condensed-700.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
 
 :root {
   /* --- Superficies y Canvas (SaaS Moderno / Clean Tech) --- */
   --cotton: #f8fafc;
   --cotton-deep: #f1f5f9;
   --cotton-line: #e2e8f0;
+  /* Filete de estado activo: un paso más oscuro, nunca el acento entero. */
+  --cotton-line-strong: #cbd5e1;
   --tag: #ffffff;
   --nylon: #0f172a;
   --nylon-2: #1e293b;
@@ -60,7 +41,8 @@
   /* --- Tipografía y Tinta --- */
   --ink: #0f172a;
   --ink-soft: #475569;
-  --ink-faint: #94a3b8;
+  /* 4.6:1 sobre --cotton: sirve para texto secundario y placeholders. */
+  --ink-faint: #64748b;
   --on-nylon: #ffffff;
   --on-nylon-soft: #cbd5e1;
 
@@ -99,7 +81,8 @@
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
-  --radius-xl: 20px;
+  /* El techo es 16px: una tarjeta dentro de otra nunca pasa de ahí. */
+  --radius-xl: 16px;
   --radius-full: 9999px;
 
   /* Alias heredados: cualquier regla anterior sigue encontrando su valor. */
@@ -132,7 +115,8 @@
   --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* --- Reglas y medidas --- */
-  --hazard: linear-gradient(90deg, #f97316 0%, #fb923c 100%);
+  /* Un solo acento, sólido: sin degradados decorativos. */
+  --hazard: var(--accent);
   --page-width: min(1240px, calc(100% - 2.5rem));
 
   color: var(--ink);
@@ -293,6 +277,11 @@ a {
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
 }
+/* El clic se siente: el botón cede bajo el dedo y vuelve. */
+.button:active:not(:disabled) {
+  transform: translateY(0) scale(0.96);
+  box-shadow: var(--shadow-xs);
+}
 .button--secondary {
   color: var(--ink);
   border-color: var(--cotton-line);
@@ -350,7 +339,10 @@ a {
   font-size: 1.1rem;
   line-height: 1;
   box-shadow: var(--shadow-xs);
-  transition: all 150ms ease;
+  transition:
+    color 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease;
 }
 .icon-button:hover {
   color: var(--danger);
@@ -586,15 +578,6 @@ a {
   color: var(--on-nylon);
   background: var(--nylon);
 }
-.login-visual::after {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 4px;
-  background: var(--accent);
-  content: "";
-}
 .login-visual__content {
   position: relative;
   z-index: 1;
@@ -642,11 +625,14 @@ a {
   letter-spacing: -0.025em;
 }
 .login-visual h1 em {
-  padding: 0 0.2em;
+  padding: 0.02em 0.2em 0.04em;
   color: #ffffff;
   background: var(--accent);
   border-radius: var(--radius-sm);
   font-style: normal;
+  /* Cada línea marcada respeta su propio padding y su propio radio. */
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 .login-visual__content > p:not(.eyebrow) {
   max-width: 48ch;
@@ -757,7 +743,8 @@ a {
   gap: 0.7rem;
   padding: 0.85rem 0.9rem;
   border: 1px solid var(--cotton-line);
-  border-radius: 0;
+  /* Concéntrico con la tarjeta (16px - 10px de aire interno). */
+  border-radius: var(--radius-md);
   color: var(--ink-soft);
   background: var(--cotton);
   font-size: 0.78rem;
@@ -767,12 +754,12 @@ a {
 }
 .security-icon {
   display: block;
-  width: 0.85rem;
-  height: 0.85rem;
+  width: 0.6rem;
+  height: 0.6rem;
   flex: none;
-  margin-top: 0.2rem;
-  border: 1px solid var(--nylon);
-  background: var(--hazard);
+  margin-top: 0.35rem;
+  border-radius: var(--radius-full);
+  background: var(--accent);
 }
 .scope-note {
   margin: 1.1rem 0 0;

@@ -7,15 +7,17 @@
   place-items: center;
   background: var(--cotton-deep);
 }
+/* Todas las placas comparten la misma proporción: la foto llena el marco y
+   ninguna queda flotando con más aire que la de al lado. Las imágenes del
+   catálogo se normalizan a 4:3 en `public/img`. */
 .store-plate--card {
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 4 / 3;
   border-bottom: 1px solid var(--cotton-line);
 }
 .store-plate--page {
   aspect-ratio: 4 / 3;
   border: 1px solid var(--cotton-line);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
 }
 .store-plate--thumb {
   width: 4.5rem;
@@ -25,7 +27,7 @@
   border-radius: var(--radius-md);
 }
 .store-plate--photo {
-  background: #ffffff;
+  background: var(--cotton-deep);
 }
 
 /* Absoluta: la foto no define el tamaño de la placa. */
@@ -34,17 +36,10 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  padding: 0.85rem 1.1rem;
-  object-fit: contain;
+  object-fit: cover;
   transition:
-    scale 400ms var(--store-ease),
+    scale 300ms var(--store-ease),
     opacity 200ms ease;
-}
-.store-plate--page .store-plate__img {
-  padding: clamp(1.5rem, 4vw, 3rem);
-}
-.store-plate--thumb .store-plate__img {
-  padding: 0.35rem;
 }
 .store-plate--thumb .store-plate__monogram {
   font-size: 1.9rem;

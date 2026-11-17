@@ -7,22 +7,22 @@
   border: 1px solid var(--cotton-line);
   border-radius: var(--radius-lg);
   background: var(--tag);
-  box-shadow: var(--shadow-sm);
   overflow: hidden;
   animation: store-rise 420ms var(--store-ease) both;
   animation-delay: calc(var(--i, 0) * 45ms);
   transition:
-    transform 200ms ease,
-    box-shadow 200ms ease,
-    border-color 200ms ease;
+    transform 180ms var(--store-ease),
+    box-shadow 180ms var(--store-ease),
+    border-color 180ms var(--store-ease);
 }
+/* La sombra entra sólo al pasar el mouse: borde quieto, elevación en estado. */
 .store-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--cotton-line-strong);
 }
 .store-card:hover .store-plate__img {
-  scale: 1.04;
+  scale: 1.03;
 }
 
 /* Toda la tarjeta abre la ficha; el enlace va por encima del contenido. */
@@ -33,8 +33,9 @@
   border-radius: var(--radius-lg);
 }
 .store-card__open:focus-visible {
+  /* El anillo se dibuja hacia adentro: la tarjeta recorta el overflow. */
   outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline-offset: -4px;
 }
 
 .store-card__body {
@@ -77,7 +78,7 @@
   animation: none;
 }
 .store-skeleton--banner {
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 4 / 3;
 }
 .store-skeleton--line {
   height: 0.7rem;

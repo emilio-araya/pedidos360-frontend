@@ -98,7 +98,7 @@ export function LoginPage() {
             Scope solicitado: <code>{environment.apiScope}</code>
           </p>
         </div>
-        <p className="login-footer">{environment.appName} · Pedidos360</p>
+        <p className="login-footer">{environment.appName}</p>
       </section>
     </main>
   );

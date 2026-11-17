@@ -74,15 +74,13 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* El conteo es un dato, no una insignia: texto alineado con el titular. */
 .store-count {
-  padding: 0.25rem 0.65rem;
-  border-radius: var(--radius-full);
-  color: var(--on-nylon);
-  background: var(--nylon);
+  padding: 0;
+  color: var(--ink-soft);
   font-family: var(--font-body);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-size: 0.85rem;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }

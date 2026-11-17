@@ -1,4 +1,4 @@
-/* Catálogo: el estante. Encabezado rotulado, grilla y paginador. */
+/* Catálogo: encabezado limpio, grilla y paginador */
 
 .store-main {
   width: var(--store-width);
@@ -13,19 +13,19 @@
   justify-content: space-between;
   gap: 1rem;
   margin: 0 0 1.5rem;
-  padding-bottom: 0.8rem;
-  border-bottom: 1px solid var(--nylon);
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--cotton-line);
 }
 .store-shelf__head h2 {
   margin: 0;
-  font-size: clamp(1.8rem, 2.8vw, 2.4rem);
-  line-height: 0.92;
+  font-size: clamp(1.6rem, 2.4vw, 2.1rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
 }
 .store-shelf__head h2::before,
 .store-shelf__head h2::after {
-  content: '"';
-  color: var(--ink-faint);
-  font-weight: 500;
+  content: none;
 }
 
 .store-pager {
@@ -36,14 +36,12 @@
   gap: 1rem;
   margin-top: 2rem;
   padding-top: 1.25rem;
-  border-top: 1px solid var(--nylon);
+  border-top: 1px solid var(--cotton-line);
 }
 .store-pager__pos {
   color: var(--ink-soft);
-  font-family: var(--font-label);
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
 }
 .store-pager__pos strong {
@@ -54,9 +52,10 @@
 .store-empty {
   padding: 3.5rem 1.5rem;
   border: 1px dashed var(--cotton-line);
+  border-radius: var(--radius-lg);
   background: var(--tag);
 }
 .store-empty p {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 }

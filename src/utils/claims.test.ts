@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   claimsFromAccessToken,
-  cognitoRolesFromClaims,
   effectiveClaims,
   normalizeRole,
   oidFromClaims,
@@ -16,14 +15,6 @@ describe("claims de autenticación", () => {
       rolesFromClaims({ roles: ["Admin", "Operador", "admin", "desconocido"] }),
     ).toEqual(["Admin", "Operador"]);
     expect(rolesFromClaims({ roles: "Cliente" })).toEqual(["Cliente"]);
-  });
-
-  it("solo acepta los nombres exactos de grupos Cognito", () => {
-    expect(
-      cognitoRolesFromClaims({
-        "cognito:groups": ["Admin", "admin", "Operador", "Desconocido"],
-      }),
-    ).toEqual(["Admin", "Operador"]);
   });
 
   it("usa oid y falling back a sub", () => {

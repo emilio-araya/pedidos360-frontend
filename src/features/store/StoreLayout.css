@@ -68,7 +68,7 @@
   background: var(--accent);
   font-family: var(--font-body);
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   line-height: 1;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -99,13 +99,9 @@
   margin: 0;
   font-family: var(--font-display);
   font-size: clamp(2rem, 3.2vw, 2.6rem);
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.025em;
   line-height: 1.1;
-}
-.store-page-head h1::before,
-.store-page-head h1::after {
-  content: none;
 }
 
 .store-grid {
@@ -179,7 +175,7 @@
   padding-top: 0.9rem;
   border-top: 1px solid var(--cotton-line);
   color: var(--ink);
-  font-weight: 700;
+  font-weight: 600;
 }
 .store-ledger__row--total::after {
   border-bottom-color: transparent;
@@ -206,7 +202,7 @@
 .store-summary h2 {
   margin: 0;
   font-size: 1.3rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.02em;
 }
 .store-summary h2::before,

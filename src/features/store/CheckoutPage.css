@@ -27,7 +27,7 @@
   padding-bottom: 0.9rem;
   border-bottom: 1px solid var(--cotton-line);
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.015em;
 }
 
@@ -68,7 +68,7 @@
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 1.05rem;
-  font-weight: 700;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
@@ -165,7 +165,7 @@
   color: var(--ink);
   font-family: var(--font-display);
   font-size: clamp(1.8rem, 3vw, 2.4rem);
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.15;
 }
@@ -278,7 +278,7 @@
 .store-confirm__aside h2 {
   margin: 0;
   font-size: 1.35rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.02em;
 }
 .store-confirm__aside p {

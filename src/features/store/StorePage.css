@@ -25,21 +25,13 @@
   padding: clamp(2.5rem, 5vw, 4rem) 0 clamp(3rem, 5vw, 4.5rem);
 }
 
-.store-hero .eyebrow {
-  margin-bottom: 1.1rem;
-  color: var(--accent-deep);
-}
-.store-hero .eyebrow::before,
-.store-hero .eyebrow::after {
-  content: '"';
-}
 
 .store-hero h1 {
   max-width: 14ch;
   margin: 0 0 1.6rem;
   color: var(--ink);
   font-size: clamp(2.75rem, 5.8vw, 4.75rem);
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.06;
   letter-spacing: -0.03em;
   text-wrap: balance;

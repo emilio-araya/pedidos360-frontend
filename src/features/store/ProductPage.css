@@ -120,7 +120,7 @@
 .store-product__missing h1 {
   margin: 0;
   font-size: clamp(2rem, 4vw, 2.8rem);
-  font-weight: 700;
+  font-weight: 600;
 }
 .store-product__missing p {
   margin: 0 0 0.6rem;
@@ -149,7 +149,7 @@
 .store-related h2 {
   margin: 0 0 1.5rem;
   font-size: clamp(1.5rem, 2.2vw, 1.9rem);
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.02em;
 }
 .store-related h2::before,

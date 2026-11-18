@@ -1,7 +1,7 @@
 /* Seguimiento del invitado moderno: limpio, espacioso y con tarjetas redondeadas */
 
 .store-tracking .store-checkout__empty-title {
-  font-weight: 700;
+  font-weight: 600;
   text-wrap: balance;
 }
 .store-tracking .store-checkout__empty p {
@@ -29,7 +29,7 @@
   gap: 0.65rem;
   margin: 0;
   font-size: 1.35rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.02em;
   text-wrap: balance;
 }
@@ -92,7 +92,7 @@
   gap: 0.45rem;
   font-family: var(--font-body);
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -150,7 +150,7 @@
 .store-tracking__dialog h2 {
   margin: 0 0 0.5rem;
   font-size: 1.45rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.02em;
   text-wrap: balance;
 }

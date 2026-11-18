@@ -1,10 +1,10 @@
 /* Precio y existencias: moderno, legible y con badges de estado redondeados */
 
 .store-price {
-  color: var(--ink);
+  color: var(--accent-deep);
   font-family: var(--font-body);
   font-size: 1.45rem;
-  font-weight: 700;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
   line-height: 1;
@@ -18,10 +18,10 @@
 .store-card .store-price {
   padding: 0;
   border: none;
-  color: var(--ink);
+  color: var(--accent-deep);
   background: transparent;
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .store-stock {

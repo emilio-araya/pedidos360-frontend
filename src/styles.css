@@ -133,6 +133,14 @@
   scrollbar-color: var(--ink-faint) var(--cotton-deep);
   scrollbar-width: thin;
 }
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
 html,
 body,
 #root {
@@ -164,7 +172,7 @@ h3 {
   margin-top: 0;
   color: var(--ink);
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.15;
   letter-spacing: -0.025em;
   text-wrap: balance;
@@ -237,7 +245,7 @@ a {
   color: var(--accent-deep);
   font-family: var(--font-label);
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.18em;
   line-height: 1.2;
   text-transform: uppercase;
@@ -391,18 +399,18 @@ a {
   background: var(--on-nylon);
   font-family: var(--font-display);
   font-size: 1.45rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1;
 }
 .brand strong {
   font-family: var(--font-display);
   font-size: 1.3rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.01em;
 }
 .brand b {
   color: var(--accent);
-  font-weight: 700;
+  font-weight: 600;
 }
 .brand small {
   margin-left: 0.35rem;
@@ -590,7 +598,7 @@ a {
   gap: 0.65rem;
   font-family: var(--font-display);
   font-size: 1.3rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.01em;
 }
 .login-logo span,
@@ -664,7 +672,7 @@ a {
   font-family: var(--font-label);
   font-size: 0.8rem;
   font-style: normal;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .login-panel {
@@ -828,7 +836,7 @@ a {
   color: var(--ink);
   font-family: var(--font-display);
   font-size: 2.5rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
@@ -952,7 +960,7 @@ a {
 .order-row__head strong {
   font-family: var(--font-display);
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
@@ -1311,7 +1319,7 @@ a {
 .order-number {
   font-family: var(--font-display);
   font-size: 1.15rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.03em;
 }
 .order-item__header .muted {
